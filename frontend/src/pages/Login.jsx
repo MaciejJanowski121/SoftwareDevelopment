@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
 
 function Login() {
-    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPwd, setShowPwd] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -22,22 +22,53 @@ function Login() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
-                body: JSON.stringify({ username, password }), // UserLoginDTO
+                body: JSON.stringify({ email, password }),
             });
 
             if (!res.ok) {
-                const text = await res.text();
-                throw new Error(text || "Login fehlgeschlagen.");
+                let msg = "";
+                // spróbuj JSON (ProblemDetail / JSON z backendu)
+                try {
+                    const ct = res.headers.get("content-type") || "";
+                    if (ct.includes("application/json")) {
+                        const j = await res.json();
+                        // RFC7807: detail/title; fallback na message
+                        msg = j?.detail || j?.title || j?.message || "";
+                        // walidacja: możesz wyciągnąć np. j.fields i złożyć komunikat
+                        // if (j?.fields && typeof j.fields === "object") { ... }
+                    }
+                } catch {
+                    // ignorujemy – spróbujemy fallbacków niżej
+                }
+
+                if (!msg) {
+                    // fallback po statusie (gdy brak JSON)
+                    switch (res.status) {
+                        case 401:
+                        case 404:
+                            msg = "E-Mail oder Passwort ist falsch.";
+                            break;
+                        case 429:
+                            msg = "Zu viele Versuche. Bitte später erneut versuchen.";
+                            break;
+                        case 500:
+                            msg = "Serverfehler. Bitte später erneut versuchen.";
+                            break;
+                        default:
+                            msg = "Login fehlgeschlagen.";
+                    }
+                }
+
+                throw new Error(msg);
             }
 
-
+            // OK -> czytamy JSON raz
             const data = await res.json();
-
 
             localStorage.setItem(
                 "authUser",
                 JSON.stringify({
-                    username: data.username,
+                    username: data.username, // u Ciebie to e-mail
                     role: data.role,
                     fullName: data.fullName,
                     email: data.email,
@@ -45,17 +76,15 @@ function Login() {
                 })
             );
 
-            // Routing wg roli
             if (data.role === "ROLE_ADMIN") navigate("/admin");
             else navigate("/myaccount");
         } catch (err) {
-            setErrorMsg(err.message || "Ein Fehler ist aufgetreten.");
+            setErrorMsg(err?.message || "Ein Fehler ist aufgetreten.");
         } finally {
             setSubmitting(false);
         }
     }
-
-    const isDisabled = submitting || !username.trim() || !password;
+    const isDisabled = submitting || !email.trim() || !password;
 
     return (
         <main className="auth-page" aria-label="Login">
@@ -70,13 +99,13 @@ function Login() {
 
                 <form className="auth-form" onSubmit={handleSubmit} noValidate>
                     <div className="field">
-                        <label htmlFor="username">Benutzername</label>
+                        <label htmlFor="email">E-Mail</label>
                         <input
-                            id="username"
-                            type="text"
-                            autoComplete="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            id="email"
+                            type="email"
+                            autoComplete="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             required
                             aria-invalid={Boolean(errorMsg)}
                         />
