@@ -11,6 +11,7 @@ import org.example.reservationsystem.model.User;
 import org.example.reservationsystem.repository.UserRepository;
 import org.example.reservationsystem.service.AuthService;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -34,6 +35,7 @@ public class AuthController {
         this.userRepository = userRepository;
     }
 
+
     private void writeAuthCookie(HttpServletResponse response, String token) {
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
@@ -46,18 +48,19 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthUserDTO> register(@Valid @RequestBody UserRegisterDTO userDTO,
+    public ResponseEntity<AuthUserDTO> register(@Valid @RequestBody UserRegisterDTO dto,
                                                 HttpServletResponse response) {
         try {
-            String token = authService.register(userDTO);
+            String token = authService.register(dto);
             writeAuthCookie(response, token);
 
+            // username == email (siehe Service)
             AuthUserDTO body = new AuthUserDTO(
-                    userDTO.getUsername(),
+                    dto.getEmail(),
                     "ROLE_USER",
-                    userDTO.getFullName(),
-                    userDTO.getEmail(),
-                    userDTO.getPhone()
+                    dto.getFullName(),
+                    dto.getEmail(),
+                    dto.getPhone()
             );
             return ResponseEntity.ok(body);
         } catch (DataIntegrityViolationException ex) {
@@ -66,17 +69,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO userDTO,
+    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDTO dto,
                                    HttpServletResponse response) {
         try {
-            String token = authService.login(userDTO);
+            String token = authService.login(dto);
             writeAuthCookie(response, token);
 
-            User user = userRepository.findByUsername(userDTO.getUsername())
+            User user = userRepository.findByEmail(dto.getEmail())
                     .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
             AuthUserDTO body = new AuthUserDTO(
-                    user.getUsername(),
+                    user.getUsername(),       // = email
                     user.getRole().name(),
                     user.getFullName(),
                     user.getEmail(),
@@ -86,13 +89,14 @@ public class AuthController {
         } catch (UsernameNotFoundException | BadCredentialsException e) {
             return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body("Login Failed");
         }
+
     }
 
     @GetMapping("/auth_check")
     public ResponseEntity<?> checkAuth(HttpServletRequest request) {
         var cookies = request.getCookies();
         if (cookies == null) {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body("Invalid Token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
         }
 
         String token = null;
@@ -102,26 +106,37 @@ public class AuthController {
                 break;
             }
         }
-        if (token == null) {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body("Invalid Token");
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
         }
 
+        // 1) Bez rzucania wyjątków — jeśli token zły/expired -> 401
+        final String subject;
         try {
-            String username = jwtService.getUsername(token);
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-            AuthUserDTO body = new AuthUserDTO(
-                    user.getUsername(),
-                    user.getRole().name(),
-                    user.getFullName(),
-                    user.getEmail(),
-                    user.getPhone()
-            );
-            return ResponseEntity.ok(body);
+            subject = jwtService.getUsername(token); // u Ciebie to 'username' = email
         } catch (Exception e) {
-            return ResponseEntity.status(HttpServletResponse.SC_UNAUTHORIZED).body("Invalid Token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
         }
+
+        // 2) Szukaj najpierw po username, a jeśli pusto, to po email
+        var userOpt = userRepository.findByUsername(subject);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByEmail(subject);
+        }
+        if (userOpt.isEmpty()) {
+            // nie rzucamy UsernameNotFoundException, tylko 401
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
+        }
+
+        var user = userOpt.get();
+        var body = new AuthUserDTO(
+                user.getUsername(),
+                user.getRole().name(),
+                user.getFullName(),
+                user.getEmail(),
+                user.getPhone()
+        );
+        return ResponseEntity.ok(body);
     }
 
     @PostMapping("/logout")

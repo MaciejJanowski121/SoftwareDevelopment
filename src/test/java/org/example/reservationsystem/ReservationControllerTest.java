@@ -22,22 +22,17 @@ class ReservationControllerTest {
 
     private ReservationService reservationService;
     private JwtService jwtService;
-
     private ReservationController reservationController;
 
     @BeforeEach
     void setUp() {
-        // Mocks erstellen
         reservationService = mock(ReservationService.class);
         jwtService = mock(JwtService.class);
-
-        // Controller mit genau 2 Abhängigkeiten instanziieren
         reservationController = new ReservationController(reservationService, jwtService);
     }
 
     @Test
     void createReservation_shouldReturnUnauthorized_whenTokenMissing() {
-        // Arrange
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getCookies()).thenReturn(null);
 
@@ -46,10 +41,8 @@ class ReservationControllerTest {
         dto.setStartTime(LocalDateTime.of(2025, 10, 30, 18, 0));
         dto.setEndTime(LocalDateTime.of(2025, 10, 30, 20, 0));
 
-        // Act
         ResponseEntity<?> resp = reservationController.createReservation(request, dto);
 
-        // Assert
         assertEquals(401, resp.getStatusCodeValue());
         assertNull(resp.getBody());
         verifyNoInteractions(reservationService);
@@ -57,10 +50,11 @@ class ReservationControllerTest {
 
     @Test
     void createReservation_shouldReturnOk_whenValidTokenAndPayload() {
-        // Arrange
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getCookies()).thenReturn(new Cookie[]{ new Cookie("token", "validToken") });
-        when(jwtService.getUsername("validToken")).thenReturn("testuser");
+
+        // ⬇️ JWT zwraca e-mail
+        when(jwtService.getUsername("validToken")).thenReturn("testuser@example.com");
 
         ReservationRequestDTO dto = new ReservationRequestDTO();
         dto.setTableNumber(5);
@@ -72,52 +66,44 @@ class ReservationControllerTest {
         Reservation saved = new Reservation(start, end);
         saved.setId(123L);
 
-        // Service-Signatur: addReservation(Reservation, int tableNumber, String username)
-        when(reservationService.addReservation(any(Reservation.class), eq(5), eq("testuser")))
+        when(reservationService.addReservation(any(Reservation.class), eq(5), eq("testuser@example.com")))
                 .thenReturn(saved);
 
-        // Act
         ResponseEntity<?> resp = reservationController.createReservation(request, dto);
 
-        // Assert
         assertEquals(200, resp.getStatusCodeValue());
         assertNotNull(resp.getBody());
-        verify(reservationService).addReservation(any(Reservation.class), eq(5), eq("testuser"));
+        verify(reservationService).addReservation(any(Reservation.class), eq(5), eq("testuser@example.com"));
     }
 
     @Test
     void deleteReservation_shouldReturnNoContent() {
-        // Arrange
         doNothing().when(reservationService).deleteReservation(42L);
 
-        // Act
         ResponseEntity<Void> resp = reservationController.deleteReservation(42L);
 
-        // Assert
         assertEquals(204, resp.getStatusCodeValue());
         verify(reservationService).deleteReservation(42L);
     }
 
     @Test
     void getUserReservation_shouldReturnUnauthorized_whenTokenMissing() {
-        // Arrange
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getCookies()).thenReturn(null);
 
-        // Act
         ResponseEntity<?> resp = reservationController.getUserReservation(request);
 
-        // Assert
         assertEquals(401, resp.getStatusCodeValue());
         verifyNoInteractions(reservationService);
     }
 
     @Test
     void getUserReservation_shouldReturnOk_whenReservationExists() {
-        // Arrange
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getCookies()).thenReturn(new Cookie[]{ new Cookie("token", "validToken") });
-        when(jwtService.getUsername("validToken")).thenReturn("alice");
+
+        // ⬇️ e-mail jako „username”
+        when(jwtService.getUsername("validToken")).thenReturn("alice@example.com");
 
         Reservation r = new Reservation(
                 LocalDateTime.of(2025, 6, 8, 18, 0),
@@ -125,47 +111,40 @@ class ReservationControllerTest {
         );
         r.setId(7L);
 
-        when(reservationService.getUserReservation("alice")).thenReturn(r);
+        when(reservationService.getUserReservation("alice@example.com")).thenReturn(r);
 
-        // Act
         ResponseEntity<?> resp = reservationController.getUserReservation(request);
 
-        // Assert
         assertEquals(200, resp.getStatusCodeValue());
         assertNotNull(resp.getBody());
-        verify(reservationService).getUserReservation("alice");
+        verify(reservationService).getUserReservation("alice@example.com");
     }
 
     @Test
     void getUserReservation_shouldReturnNoContent_whenReservationMissing() {
-        // Arrange
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getCookies()).thenReturn(new Cookie[]{ new Cookie("token", "validToken") });
-        when(jwtService.getUsername("validToken")).thenReturn("bob");
-        when(reservationService.getUserReservation("bob")).thenReturn(null);
+        when(jwtService.getUsername("validToken")).thenReturn("bob@example.com");
+        when(reservationService.getUserReservation("bob@example.com")).thenReturn(null);
 
-        // Act
         ResponseEntity<?> resp = reservationController.getUserReservation(request);
 
-        // Assert
         assertEquals(204, resp.getStatusCodeValue());
     }
 
     @Test
     void getAvailableTables_shouldReturnList() {
-        // Arrange
         LocalDateTime start = LocalDateTime.of(2025, 10, 30, 18, 0);
         when(reservationService.findAvailableTables(start, 120))
                 .thenReturn(List.of(new TableViewDTO(10L, 3, 2)));
 
-        // Act
         ResponseEntity<List<TableViewDTO>> resp =
                 reservationController.getAvailableTables("2025-10-30T18:00:00", 120);
 
-        // Assert
         assertEquals(200, resp.getStatusCodeValue());
         assertNotNull(resp.getBody());
         assertEquals(1, resp.getBody().size());
         assertEquals(3, resp.getBody().get(0).getTableNumber());
         assertEquals(2, resp.getBody().get(0).getNumberOfSeats());
-    }}
+    }
+}

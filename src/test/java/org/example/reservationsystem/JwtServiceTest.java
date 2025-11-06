@@ -8,7 +8,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
 
@@ -18,70 +17,48 @@ public class JwtServiceTest {
 
     private JwtService jwtService;
 
-
     private final String testSecretBase64 = Base64.getEncoder()
             .encodeToString(Keys.secretKeyFor(io.jsonwebtoken.SignatureAlgorithm.HS256).getEncoded());
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         jwtService = new JwtService();
-
-
         ReflectionTestUtils.setField(jwtService, "secretKeyBase64", testSecretBase64);
-
-
         ReflectionTestUtils.setField(jwtService, "jwtExpiration", 3600000L);
     }
 
     @Test
-    public void shouldGenerateTokenAndExtractUsername() {
-
-        UserDetails user = new User("maciej", "test-password", Collections.emptyList());
-
+    void shouldGenerateTokenAndExtractEmailAsUsername() {
+        UserDetails user = new User("maciej@example.com", "test-password", Collections.emptyList());
 
         String token = jwtService.generateToken(user);
+        assertNotNull(token);
 
-
-        System.out.println("Generated token: " + token);
-
-
-        assertNotNull(token, "Token should not be null!");
-
-
-        String username = jwtService.extractUsername(token);
-        assertEquals("maciej", username, "Extracted username should be 'maciej'");
+        String extracted = jwtService.extractUsername(token);
+        assertEquals("maciej@example.com", extracted);
     }
 
     @Test
-    public void shouldValidateToken() {
-
-        UserDetails user = new User("maciej", "test-password", Collections.emptyList());
-
-
+    void shouldValidateToken() {
+        UserDetails user = new User("maciej@example.com", "test-password", Collections.emptyList());
         String token = jwtService.generateToken(user);
 
-
-        boolean isValid = jwtService.isTokenValid(token, user);
-
-
-        assertTrue(isValid, "Token should be valid for the given user");
+        assertTrue(jwtService.isTokenValid(token, user));
     }
 
     @Test
-    public void shouldDetectExpiredToken() throws InterruptedException {
-
+    void shouldDetectExpiredToken() throws InterruptedException {
         ReflectionTestUtils.setField(jwtService, "jwtExpiration", 1000L);
-
-        UserDetails user = new User("maciej", "test-password", Collections.emptyList());
+        UserDetails user = new User("maciej@example.com", "test-password", Collections.emptyList());
         String token = jwtService.generateToken(user);
-
 
         Thread.sleep(2000);
+        assertFalse(jwtService.isTokenValid(token, user));
+    }
 
-
-        boolean isValid = jwtService.isTokenValid(token, user);
-
-
-        assertFalse(isValid, "Token should be expired");
+    @Test
+    void shouldReturnFalseForInvalidToken() {
+        UserDetails user = new User("maciej@example.com", "test-password", Collections.emptyList());
+        assertFalse(jwtService.isTokenValid("invalid.token.value", user));
     }
 }

@@ -36,7 +36,7 @@ function Home() {
                     <div>
                         <h2>Öffnungszeiten</h2>
                         <p>Mo–Fr: 12:00–22:00</p>
-                        <p>Sa–So: 12:00–23:00</p>
+                        <p>Sa–So: 12:00–22:00</p>
                     </div>
                     <div>
                         <h2>Adresse</h2>

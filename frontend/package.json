@@ -38,11 +38,7 @@
       "last 1 safari version"
     ]
   },
-  "jest": {
-    "setupFilesAfterEnv": [
-      "<rootDir>/src/setupTests.js"
-    ]
-  },
+
   "devDependencies": {
     "@testing-library/cypress": "^10.0.1",
     "@testing-library/jest-dom": "^6.6.3",

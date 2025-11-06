@@ -3,10 +3,11 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 function ReservationForm({ setReservation }) {
+    /** ------------------ STATE & STAŁE ------------------ */
     const [startDatePart, setStartDatePart] = useState("");
     const [hour, setHour] = useState("12");
     const [minute, setMinute] = useState("00");
-    const [minutes, setMinutes] = useState(120); // 30..300
+    const [minutes, setMinutes] = useState(120);
     const [tableNumber, setTableNumber] = useState("");
     const [availableTables, setAvailableTables] = useState([]);
     const [formError, setFormError] = useState("");
@@ -21,14 +22,15 @@ function ReservationForm({ setReservation }) {
     const MIN_MIN = 30;
     const MAX_MIN = 300;
     const OPENING_HOUR = 12;
-    const LAST_SELECTABLE_HOUR = 21; // 22 wykluczone
+    const LAST_SELECTABLE_HOUR = 21; // 21:30 to max start (koniec do 22:00)
 
-    // utils
+    /** ------------------ HELPERY ------------------ */
     const pad = (n) => (n < 10 ? "0" + n : "" + n);
     const todayDateStr = useMemo(() => {
         const d = new Date();
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
     }, []);
+
     const toIsoWithSeconds = (date) =>
         `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
             date.getDate()
@@ -36,7 +38,7 @@ function ReservationForm({ setReservation }) {
             date.getSeconds()
         )}`;
 
-    // hidden dla Cypressa (#startTime)
+    // łączymy datę + HH:mm
     const startTimePart = `${pad(Number(hour))}:${pad(Number(minute))}`;
     const buildStartDate = (date, hh, mm) =>
         date ? new Date(`${date}T${pad(Number(hh))}:${pad(Number(mm))}:00`) : null;
@@ -59,7 +61,7 @@ function ReservationForm({ setReservation }) {
             ? new Date(startDateObj.getTime() + minutes * 60000)
             : null;
 
-    // domyśl: dziś + zaokrąglenie do 00/30; jeżeli <12 -> 12:00; jeżeli po 21:30 -> jutro 12:00
+    /** ------------------ DOMYŚLNA WARTOŚĆ (data + czas) ------------------ */
     useEffect(() => {
         const now = new Date();
         const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
@@ -71,7 +73,7 @@ function ReservationForm({ setReservation }) {
         let m = now.getMinutes() < 30 ? 30 : 0;
         if (m === 0 && now.getMinutes() >= 30) h++;
 
-        // widełki 12..21 (22 nie wolno); po 21:30 skocz na jutro 12:00
+        // widełki 12..21 (22 wykluczone); po 21:30 przeskocz na jutro 12:00
         if (h < OPENING_HOUR) {
             h = OPENING_HOUR;
             m = 0;
@@ -91,23 +93,30 @@ function ReservationForm({ setReservation }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // --- OGRANICZENIE SPAMU ZAPYTAŃ: debounce + abort + pamięć ostatniej krotki ---
+    /** ------------------ DOSTĘPNE STOLIKI (debounce + abort) ------------------ */
     const lastQueryRef = useRef(""); // "startISO|minutes"
     useEffect(() => {
-        setFormError("");
+        // NIE czyścimy tutaj formError — żeby nie zgasić komunikatu 409!
+        // Czyścimy tylko przy zmianie pól (onChange poniżej).
 
-        // warunki brzegowe
+        // brak danych → brak zapytań
         if (!startDateObj || !minutes) {
             setAvailableTables([]);
             return;
         }
         const h = startDateObj.getHours();
         const mm = startDateObj.getMinutes();
-        // twarde widełki 12:00..21:30 — jeśli poza, nie pytamy backendu
-        if (h < OPENING_HOUR || h > LAST_SELECTABLE_HOUR || (h === LAST_SELECTABLE_HOUR && mm > 30)) {
+
+        // tylko dozwolone godziny
+        if (
+            h < OPENING_HOUR ||
+            h > LAST_SELECTABLE_HOUR ||
+            (h === LAST_SELECTABLE_HOUR && mm > 30)
+        ) {
             setAvailableTables([]);
             return;
         }
+
         const maxAllowed = maxMinutesForStart(startDateObj);
         if (maxAllowed < MIN_MIN) {
             setAvailableTables([]);
@@ -117,7 +126,6 @@ function ReservationForm({ setReservation }) {
         const startISO = toIsoWithSeconds(startDateObj);
         const key = `${startISO}|${minutes}`;
         if (key === lastQueryRef.current) {
-            // nic się nie zmieniło – nie odpalaj kolejnego fetcha
             return;
         }
 
@@ -133,14 +141,14 @@ function ReservationForm({ setReservation }) {
                 if (!res.ok) throw new Error("Fehler beim Laden der verfügbaren Tische.");
                 const data = await res.json();
                 setAvailableTables(Array.isArray(data) ? data : []);
-                lastQueryRef.current = key; // zapamiętaj powodzenie zapytania
+                lastQueryRef.current = key;
             } catch (e) {
                 if (e.name !== "AbortError") {
                     console.error(e);
                     setAvailableTables([]);
                 }
             }
-        }, 300); // debounce 300 ms
+        }, 300);
 
         return () => {
             clearTimeout(t);
@@ -148,7 +156,7 @@ function ReservationForm({ setReservation }) {
         };
     }, [API, minutes, startDateObj]);
 
-    // reset stolika jeśli zniknął
+    /** ------------------ RESET WYBRANEGO STOLIKA, GDY ZNIKNIE ------------------ */
     useEffect(() => {
         if (!tableNumber) return;
         const stillAvail = availableTables.some(
@@ -157,49 +165,50 @@ function ReservationForm({ setReservation }) {
         if (!stillAvail) setTableNumber("");
     }, [availableTables, tableNumber]);
 
+    /** ------------------ SUBMIT ------------------ */
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setFormError("");
 
-        if (!startDateObj) return setFormError("Bitte Startzeit auswählen.");
+        // logika walidacji (jak było)
+        const clearThen = (msg) => {
+            setFormError(msg);
+            return;
+        };
 
+        if (!startDateObj) return clearThen("Bitte Startzeit auswählen.");
         const h = startDateObj.getHours();
         const mm = startDateObj.getMinutes();
-        // twarde widełki 12:00..21:30
+
         if (
             h < OPENING_HOUR ||
             h > LAST_SELECTABLE_HOUR ||
             (h === LAST_SELECTABLE_HOUR && mm > 30)
         ) {
-            return setFormError(
+            return clearThen(
                 "Reservierungen sind nur zwischen 12:00 und 21:30 (Ende bis 22:00) möglich."
             );
         }
-
         if (startDateObj < new Date()) {
-            return setFormError("Reservierungen in der Vergangenheit sind nicht möglich.");
+            return clearThen("Reservierungen in der Vergangenheit sind nicht möglich.");
         }
-
         if (!minutes || minutes < MIN_MIN || minutes > MAX_MIN) {
-            return setFormError("Die Dauer muss zwischen 30 und 300 Minuten liegen.");
+            return clearThen("Die Dauer muss zwischen 30 und 300 Minuten liegen.");
         }
 
         const maxAllowed = maxMinutesForStart(startDateObj);
         if (minutes > maxAllowed) {
             if (maxAllowed < MIN_MIN) {
-                return setFormError(
+                return clearThen(
                     "Die letzte Reservierung muss spätestens um 22:00 Uhr enden. Bitte frühere Zeit wählen."
                 );
             }
-            return setFormError(
+            return clearThen(
                 `Für diese Startzeit ist maximal ${maxAllowed} Minuten erlaubt (bis 22:00 Uhr).`
             );
         }
-
-        if (!tableNumber) return setFormError("Bitte Tisch auswählen.");
+        if (!tableNumber) return clearThen("Bitte Tisch auswählen.");
 
         const end = new Date(startDateObj.getTime() + minutes * 60000);
-
         const payload = {
             tableNumber: Number(tableNumber),
             startTime: toIsoWithSeconds(startDateObj),
@@ -213,21 +222,51 @@ function ReservationForm({ setReservation }) {
                 credentials: "include",
                 body: JSON.stringify(payload),
             });
-            const txt = await resp.text();
-            if (!resp.ok) throw new Error(txt || "Reservierung fehlgeschlagen.");
 
-            const data = txt ? JSON.parse(txt) : null;
+            // 409 – pokaż komunikat z backendu (ProblemDetail lub text)
+            if (resp.status === 409) {
+                const ct = resp.headers.get("content-type") || "";
+                let msg = "Tisch ist bereits reserviert.";
+                try {
+                    if (ct.includes("application/json")) {
+                        const j = await resp.json();
+                        msg = j.detail || j.title || JSON.stringify(j);
+                    } else {
+                        msg = (await resp.text()) || msg;
+                    }
+                } catch {}
+                setFormError(msg); // <-- NIE nawigujemy
+                return;
+            }
+
+            // Inne 4xx/5xx
+            if (!resp.ok) {
+                const ct = resp.headers.get("content-type") || "";
+                let msg = "";
+                try {
+                    msg = ct.includes("application/json")
+                        ? (await resp.json()).detail || (await resp.json()).title || JSON.stringify(await resp.json())
+                        : await resp.text();
+                } catch {}
+                throw new Error(msg || `HTTP ${resp.status}`);
+            }
+
+            // 2xx – sukces
+            const ct = resp.headers.get("content-type") || "";
+            const data = ct.includes("application/json")
+                ? await resp.json()
+                : JSON.parse(await resp.text());
             setReservation([data]);
             navigate("/reservations/my");
         } catch (err) {
-            console.error(err);
-            setFormError(`Reservierung fehlgeschlagen: ${err.message}`);
+            setFormError(`Reservierung fehlgeschlagen: ${err.message || err}`);
         }
     };
 
+    /** ------------------ FORMULARZ ------------------ */
     return (
         <form onSubmit={handleSubmit} className="reservation-form" noValidate>
-            {/* Data */}
+            {/* Datum */}
             <label htmlFor="startDate" style={{ display: "block", marginBottom: 4 }}>
                 Datum
             </label>
@@ -238,15 +277,15 @@ function ReservationForm({ setReservation }) {
                 min={todayDateStr}
                 onChange={(e) => {
                     setStartDatePart(e.target.value);
-                    setFormError("");
-                    lastQueryRef.current = ""; // pozwól kolejnemu fetchowi się wykonać
+                    setFormError("");             // czyść tylko przy zmianie pól
+                    lastQueryRef.current = "";    // pozwól na nowe zapytanie
                 }}
                 required
             />
 
-            {/* Godzina + Minuty */}
+            {/* Uhrzeit */}
             <label style={{ display: "block", margin: "12px 0 4px" }}>Uhrzeit</label>
-            <div style={{ display: "flex", gap: 8 }}>
+            <div className="time-row">
                 <select
                     id="hour"
                     value={hour}
@@ -281,11 +320,8 @@ function ReservationForm({ setReservation }) {
                     <option value="30">30</option>
                 </select>
             </div>
-            <small style={{ display: "block", marginTop: 4, color: "#555" }}>
-                Start nur von <strong>12:00</strong> bis <strong>21:30</strong> (Ende spätestens 22:00).
-            </small>
 
-            {/* Hidden #startTime – dla Cypressa */}
+            {/* Hidden #startTime – dla Cypress (zostawiamy jak było) */}
             <input
                 id="startTime"
                 type="hidden"
@@ -311,7 +347,9 @@ function ReservationForm({ setReservation }) {
                     const m = MIN_MIN + i * 30;
                     const disabled = !!startDateObj && m > maxMinutesForStart(startDateObj);
                     const label =
-                        m < 60 ? `${m} Min` : `${Math.floor(m / 60)} Std${m % 60 ? ` ${m % 60} Min` : ""}`;
+                        m < 60
+                            ? `${m} Min`
+                            : `${Math.floor(m / 60)} Std${m % 60 ? ` ${m % 60} Min` : ""}`;
                     return (
                         <option key={m} value={m} disabled={disabled}>
                             {label}
@@ -321,7 +359,7 @@ function ReservationForm({ setReservation }) {
                 })}
             </select>
 
-            {/* Tische */}
+            {/* Tisch */}
             <label htmlFor="tableNumber" style={{ display: "block", margin: "12px 0 4px" }}>
                 Tisch
             </label>
@@ -344,7 +382,10 @@ function ReservationForm({ setReservation }) {
             {endPreview && (
                 <small style={{ display: "block", marginTop: 6, color: "#555" }}>
                     Ende:{" "}
-                    {endPreview.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}{" "}
+                    {endPreview.toLocaleTimeString("de-DE", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    })}{" "}
                     (spätestens 22:00 Uhr)
                 </small>
             )}
@@ -356,7 +397,11 @@ function ReservationForm({ setReservation }) {
                 </p>
             )}
 
-            <button type="submit" style={{ marginTop: 12 }} disabled={maxAllowedForHint < MIN_MIN}>
+            <button
+                type="submit"
+                style={{ marginTop: 12 }}
+                disabled={maxAllowedForHint < MIN_MIN}
+            >
                 Reservieren
             </button>
         </form>

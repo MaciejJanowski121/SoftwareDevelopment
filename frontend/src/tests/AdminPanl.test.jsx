@@ -27,15 +27,11 @@ describe("AdminPanel", () => {
         );
 
         await waitFor(() => {
-            // Nagłówek panelu admina
             expect(screen.getByText(/Admin Panel/i)).toBeInTheDocument();
-
-            // Sprawdzenie wyświetlenia użytkownika
             expect(screen.getByText(/Angemeldet als:/i)).toBeInTheDocument();
             expect(screen.getByText(/Maciej/i)).toBeInTheDocument();
         });
 
-        // Brak przekierowania w trybie admina
         expect(mockNavigate).not.toHaveBeenCalled();
     });
 
@@ -45,8 +41,6 @@ describe("AdminPanel", () => {
                 <AdminPanel username="Maciej" role="ROLE_USER" />
             </MemoryRouter>
         );
-
-        // Sprawdzenie natychmiastowego przekierowania
         expect(mockNavigate).toHaveBeenCalledTimes(1);
         expect(mockNavigate).toHaveBeenCalledWith("/myaccount");
     });
@@ -57,7 +51,6 @@ describe("AdminPanel", () => {
                 <AdminPanel username="Maciej" />
             </MemoryRouter>
         );
-
         expect(mockNavigate).toHaveBeenCalledWith("/myaccount");
     });
 });

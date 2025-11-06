@@ -8,11 +8,10 @@ const renderWithRouter = (ui) => render(<BrowserRouter>{ui}</BrowserRouter>);
 describe("Register", () => {
     beforeEach(() => fetch.mockClear());
 
-    test("sendet formular und zeigt succes", async () => {
+    test("sendet Formular und zeigt Erfolg", async () => {
         fetch.mockResolvedValueOnce({
             ok: true,
             json: async () => ({
-                username: "maciej",
                 fullName: "Maciej Janowski",
                 email: "maciej@example.com",
                 phone: "+491701234567",
@@ -21,11 +20,19 @@ describe("Register", () => {
 
         renderWithRouter(<Register />);
 
-        fireEvent.change(screen.getByLabelText(/Vollständiger Name/i), { target: { value: "Maciej Janowski" } });
-        fireEvent.change(screen.getByLabelText(/^E-Mail$/i), { target: { value: "maciej@example.com" } });
-        fireEvent.change(screen.getByLabelText(/Telefon/i), { target: { value: "+491701234567" } });
-        fireEvent.change(screen.getByLabelText(/Benutzername/i), { target: { value: "maciej" } });
-        fireEvent.change(screen.getByLabelText(/^Passwort$/i), { target: { value: "secret1" } });
+        fireEvent.change(screen.getByLabelText(/Vollständiger Name/i), {
+            target: { value: "Maciej Janowski" },
+        });
+        fireEvent.change(screen.getByLabelText(/^E-Mail$/i), {
+            target: { value: "maciej@example.com" },
+        });
+        fireEvent.change(screen.getByLabelText(/Telefon/i), {
+            target: { value: "+491701234567" },
+        });
+        // brak „Benutzername” w UI – pomijamy
+        fireEvent.change(screen.getByLabelText(/^Passwort$/i), {
+            target: { value: "secret1" },
+        });
 
         fireEvent.click(screen.getByRole("button", { name: /Registrieren/i }));
 
@@ -33,15 +40,12 @@ describe("Register", () => {
             expect(fetch).toHaveBeenCalledWith(
                 "http://localhost:8080/auth/register",
                 expect.objectContaining({
-                    body: JSON.stringify({
-                        username: "maciej",
-                        password: "secret1",
-                        fullName: "Maciej Janowski",
-                        email: "maciej@example.com",
-                        phone: "+491701234567",
-                    }),
+                    method: "POST",
+                    credentials: "include",
+                    headers: expect.objectContaining({ "Content-Type": "application/json" }),
                 })
             );
+            // oczekuj komunikatu sukcesu (role="status")
             expect(screen.getByRole("status")).toHaveTextContent(/Registrierung erfolgreich/i);
         });
     });

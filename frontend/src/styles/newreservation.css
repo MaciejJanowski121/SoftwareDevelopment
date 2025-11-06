@@ -19,10 +19,15 @@
 padding: 40px 30px 40px 80px;
     color: #374151;
 }
-/* Węższe pola czasu */
+.newreservation-container .reservation-form .time-row {
+    display: flex;
+    gap: 8px;
+}
+
+/* Węższe pola dla godziny i minut */
 .newreservation-container .reservation-form #hour,
 .newreservation-container .reservation-form #minute {
-    width: 41% !important;
+    width: 41%;
 }
 
 /* Nagłówek */

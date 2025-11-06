@@ -1,6 +1,7 @@
 package org.example.reservationsystem.repository;
 
 import org.example.reservationsystem.model.Reservation;
+import org.example.reservationsystem.model.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -20,6 +21,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @EntityGraph(attributePaths = {"user", "table"})
     Optional<Reservation> findByUser_Username(String username);
+
 
 
 }

@@ -33,22 +33,38 @@ public class ReservationServiceTest {
     @Autowired
     private UserRepository userRepository;
 
+    // helper: jutro o 18:00–20:00 (z sekundami = 0)
+    private static LocalDateTime tomorrowAt(int hour, int minute) {
+        return LocalDateTime.now()
+                .plusDays(1)
+                .withHour(hour).withMinute(minute)
+                .withSecond(0).withNano(0);
+    }
+
     @Test
     void testAddReservation_success() {
         // --- Given: Benutzer + Tisch ---
-        User user = new User("testuser", "password", Role.ROLE_USER,
-                "John Doe", "john@example.com", "+49 170 1234567");
+        User user = new User(
+                "testuser",                 // username (u Ciebie może być e-mail)
+                "password",
+                Role.ROLE_USER,
+                "John Doe",
+                "john@example.com",
+                "+49 170 1234567"
+        );
         userRepository.saveAndFlush(user);
 
-        // Jeśli masz konstruktor (int seats, int tableNumber) — użyj go.
-        // W przeciwnym razie ustaw właściwości setterami.
+        // Jeśli nie masz konstruktora (seats, tableNumber), użyj setterów:
         RestaurantTable table = new RestaurantTable(4, 10);
+        // ewentualnie:
+        // RestaurantTable table = new RestaurantTable();
+        // table.setNumberOfSeats(4);
+        // table.setTableNumber(10);
         tableRepository.saveAndFlush(table);
 
-        // Rezerwacja: start w przyszłości, end = start + 2h
-        LocalDateTime start = LocalDateTime.now().plusHours(2);
-        LocalDateTime end   = start.plusHours(2);
-
+        // Rezerwacja JUTRO 18:00–20:00 -> zawsze przyszłość i nie później niż 22:00
+        LocalDateTime start = tomorrowAt(18, 0);
+        LocalDateTime end   = tomorrowAt(20, 0);
         Reservation reservation = new Reservation(start, end);
 
         // --- When ---
@@ -68,7 +84,8 @@ public class ReservationServiceTest {
         // stolik zawiera rezerwację w swojej liście
         RestaurantTable reloadedTable = tableRepository.findTableByTableNumber(10).orElseThrow();
         assertTrue(
-                reloadedTable.getReservations().stream().anyMatch(r -> r.getId().equals(saved.getId())),
+                reloadedTable.getReservations() != null &&
+                        reloadedTable.getReservations().stream().anyMatch(r -> r.getId().equals(saved.getId())),
                 "Table should contain the saved reservation in its reservations list"
         );
     }
@@ -76,15 +93,22 @@ public class ReservationServiceTest {
     @Test
     void testDeleteReservation() {
         // --- Given: Benutzer + Tisch + istniejąca rezerwacja ---
-        User user = new User("tester", "password", Role.ROLE_USER,
-                "Max Mustermann", "max@example.com", "+49 160 0000000");
+        User user = new User(
+                "tester",
+                "password",
+                Role.ROLE_USER,
+                "Max Mustermann",
+                "max@example.com",
+                "+49 160 0000000"
+        );
         userRepository.saveAndFlush(user);
 
         RestaurantTable table = new RestaurantTable(2, 20);
+        // lub settery, jak wyżej
         tableRepository.saveAndFlush(table);
 
-        LocalDateTime start = LocalDateTime.now().plusHours(3);
-        LocalDateTime end   = start.plusHours(1);
+        LocalDateTime start = tomorrowAt(18, 0);
+        LocalDateTime end   = tomorrowAt(19, 0);
 
         Reservation toSave = new Reservation(start, end);
         Reservation saved  = reservationService.addReservation(toSave, 20, "tester");

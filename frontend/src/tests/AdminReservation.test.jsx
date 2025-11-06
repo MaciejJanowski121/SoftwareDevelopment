@@ -26,7 +26,9 @@ describe("AdminReservations", () => {
         });
 
         renderWithRouter(<AdminReservations />);
-        await waitFor(() => expect(screen.getByText(/Maciej Janowski/i)).toBeInTheDocument());
+        await waitFor(() =>
+            expect(screen.getByText(/Maciej Janowski/i)).toBeInTheDocument()
+        );
     });
 
     test("zeigt 'Keine Reservierungen gefunden.' bei leerer Antwort", async () => {
@@ -39,7 +41,9 @@ describe("AdminReservations", () => {
 
         renderWithRouter(<AdminReservations />);
         await waitFor(() =>
-            expect(screen.getByText(/Keine Reservierungen gefunden\./i)).toBeInTheDocument()
+            expect(
+                screen.getByText(/Keine Reservierungen gefunden\./i)
+            ).toBeInTheDocument()
         );
     });
 });

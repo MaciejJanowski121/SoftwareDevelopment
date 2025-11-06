@@ -1,5 +1,6 @@
-package org.example.reservationsystem.api;
+package org.example.reservationsystem.exceptions;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -94,5 +95,49 @@ public class GlobalExceptionHandler {
         if ("Email".equals(code))    return "Bitte gib eine gültige E-Mail an.";
         if ("Size".equals(code))     return "Die Länge ist ungültig.";
         return e.getDefaultMessage() != null ? e.getDefaultMessage() : "Ungültiger Wert.";
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ProblemDetail handleCustomUserNotFound(UserNotFoundException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage() != null ? ex.getMessage() : "Benutzer wurde nicht gefunden."
+        );
+        pd.setType(URI.create("https://docs.example/errors/user-not-found"));
+        return pd;
+    }
+
+    @ExceptionHandler(TableNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ProblemDetail handleTableNotFound(TableNotFoundException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage() != null ? ex.getMessage() : "Tisch wurde nicht gefunden."
+        );
+        pd.setType(URI.create("https://docs.example/errors/table-not-found"));
+        return pd;
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ProblemDetail handleEntityNotFound(EntityNotFoundException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage() != null ? ex.getMessage() : "Ressource nicht gefunden."
+        );
+        pd.setType(URI.create("https://docs.example/errors/not-found"));
+        return pd;
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ProblemDetail handleIllegalArgument(IllegalArgumentException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage() != null ? ex.getMessage() : "Ungültige Anfrage."
+        );
+        pd.setType(URI.create("https://docs.example/errors/invalid-argument"));
+        return pd;
     }
 }

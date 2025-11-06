@@ -56,7 +56,9 @@ describe("Reservations", () => {
         renderWithRouter(<Reservations />);
 
         await waitFor(() =>
-            expect(screen.getByRole("button", { name: /Reservierung löschen/i })).toBeInTheDocument()
+            expect(
+                screen.getByRole("button", { name: /Reservierung löschen/i })
+            ).toBeInTheDocument()
         );
 
         fireEvent.click(screen.getByRole("button", { name: /Reservierung löschen/i }));

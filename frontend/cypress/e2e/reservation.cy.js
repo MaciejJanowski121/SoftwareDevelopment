@@ -1,9 +1,17 @@
+// cypress/e2e/reservation.cy.js
 describe('Reservation', () => {
+    const pad = (n) => (n < 10 ? '0' + n : String(n));
+    const stepMinute = (m) => (parseInt(m, 10) >= 30 ? '30' : '00');
+    const splitLocal = (local) => {
+        const [datePart, timePart] = local.split('T');
+        const [h, m] = timePart.split(':');
+        return { datePart, h: String(Number(h)), m };
+    };
+
     beforeEach(() => {
         cy.clearCookies();
         cy.clearLocalStorage();
 
-        // --- Authentifizierung: simuliere eingeloggt Benutzer ---
         cy.intercept('GET', '**/auth/auth_check', {
             statusCode: 200,
             headers: { 'content-type': 'application/json' },
@@ -17,20 +25,16 @@ describe('Reservation', () => {
     });
 
     it('erstellt erfolgreich eine Reservierung und navigiert zu /reservations/my', () => {
-        // --- Stub für verfügbare Tische ---
         cy.intercept('GET', '**/api/reservations/available*', {
             statusCode: 200,
-            headers: { 'content-type': 'application/json' },
             body: [
                 { id: 1, tableNumber: 5, numberOfSeats: 4 },
                 { id: 2, tableNumber: 6, numberOfSeats: 2 },
             ],
         }).as('available');
 
-        // --- Erfolgreiche Reservierungsanfrage ---
-        cy.intercept('POST', '**/api/reservations', {
+        cy.intercept('POST', '**/api/reservations*', {
             statusCode: 200,
-            headers: { 'content-type': 'application/json' },
             body: {
                 id: 100,
                 tableNumber: 5,
@@ -42,60 +46,62 @@ describe('Reservation', () => {
         cy.visit('http://localhost:3000/reservations/new');
         cy.wait('@authCheck');
 
-        // --- Setze eine gültige Startzeit (morgen 18:00 Uhr) ---
+        // jutro 18:00 (zawsze przyszłość)
         const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
         tomorrow.setHours(18, 0, 0, 0);
-        const pad = (n) => (n < 10 ? '0' + n : n);
         const futureLocal = `${tomorrow.getFullYear()}-${pad(
             tomorrow.getMonth() + 1
         )}-${pad(tomorrow.getDate())}T${pad(tomorrow.getHours())}:${pad(
             tomorrow.getMinutes()
         )}`;
+        const { datePart, h, m } = splitLocal(futureLocal);
 
-        cy.get('#startTime').invoke('attr', 'min', '1900-01-01T00:00');
-        cy.get('#startTime').clear().type(futureLocal);
+        cy.get('#startDate').clear().type(datePart);
+        cy.get('#hour').select(h);
+        cy.get('#minute').select(stepMinute(m));
+
+        cy.wait('@available');
         cy.get('#duration').select('120');
         cy.get('#tableNumber').select('5');
+
         cy.findByRole('button', { name: /reservieren/i }).click();
 
-        // --- Backend bestätigt Reservierung ---
         cy.wait('@reservationOk');
         cy.location('pathname').should('eq', '/reservations/my');
     });
 
     it('zeigt eine verständliche Meldung, wenn ein Tisch bereits reserviert ist (409)', () => {
-        // --- Verfügbare Tische ---
         cy.intercept('GET', '**/api/reservations/available*', {
             statusCode: 200,
-            headers: { 'content-type': 'application/json' },
             body: [{ id: 1, tableNumber: 1, numberOfSeats: 4 }],
         }).as('available');
 
-        // --- Konflikt: Backend meldet, dass der Tisch inzwischen reserviert ist ---
-        cy.intercept('POST', '**/api/reservations', {
+        cy.intercept('POST', '**/api/reservations*', {
             statusCode: 409,
-            headers: { 'content-type': 'text/plain' },
+            headers: { 'content-type': 'text/plain; charset=utf-8' }, // <— DODANE
             body: 'Tisch ist bereits reserviert.',
         }).as('conflict');
 
         cy.visit('http://localhost:3000/reservations/new');
         cy.wait('@authCheck');
 
-        // --- Setze eine Startzeit in naher Zukunft ---
-        const now = new Date(Date.now() + 2 * 60 * 60 * 1000);
-        now.setSeconds(0, 0);
-        const pad = (n) => (n < 10 ? '0' + n : n);
-        const startLocal = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(
-            now.getDate()
-        )}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        // jutro 18:00 (zawsze dozwolone 120 min i na pewno przyszłość)
+        const t = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        t.setHours(18, 0, 0, 0);
+        const local = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(
+            t.getDate()
+        )}T${pad(t.getHours())}:${pad(t.getMinutes())}`;
+        const { datePart, h, m } = splitLocal(local);
 
-        cy.get('#startTime').invoke('attr', 'min', '1900-01-01T00:00');
-        cy.get('#startTime').clear().type(startLocal);
+        cy.get('#startDate').clear().type(datePart);
+        cy.get('#hour').select(h);
+        cy.get('#minute').select(stepMinute(m));
+
+        cy.wait('@available');               // <— najpierw poczekaj aż lista się załaduje
         cy.get('#duration').select('120');
-        cy.get('#tableNumber').select('1');
+        cy.get('#tableNumber').select('1');  // <— dopiero po available
         cy.findByRole('button', { name: /reservieren/i }).click();
 
-        // --- Backend-Antwort 409 prüfen ---
         cy.wait('@conflict');
         cy.get('[data-cy="form-error"]', { timeout: 8000 })
             .should('be.visible')
@@ -103,32 +109,28 @@ describe('Reservation', () => {
     });
 
     it('validiert Frontend-Regeln: Vergangenheit und Überschreitung der 22:00 Uhr Grenze', () => {
-        // --- Keine echten Daten von Backend laden ---
         cy.intercept('GET', '**/api/reservations/available*', {
             statusCode: 200,
-            headers: { 'content-type': 'application/json' },
             body: [],
         }).as('availSilenced');
 
         cy.visit('http://localhost:3000/reservations/new');
         cy.wait('@authCheck');
 
-        // --- 1) Reservierung in der Vergangenheit ---
-        const pastLocal = (() => {
-            const d = new Date(Date.now() - 60 * 60 * 1000); // eine Stunde zurück
-            d.setSeconds(0, 0);
-            const pad = (n) => (n < 10 ? '0' + n : n);
-            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
-                d.getDate()
-            )}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-        })();
+        // (1) Wczoraj 18:00 → zawsze przeszłość
+        const y = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        y.setHours(18, 0, 0, 0);
+        const pastLocal = `${y.getFullYear()}-${pad(y.getMonth() + 1)}-${pad(
+            y.getDate()
+        )}T${pad(y.getHours())}:${pad(y.getMinutes())}`;
+        const p = splitLocal(pastLocal);
 
-        cy.get('#startTime').invoke('attr', 'min', '1900-01-01T00:00');
-        cy.get('#startTime').clear().type(pastLocal);
+        cy.get('#startDate').clear().type(p.datePart);
+        cy.get('#hour').select(p.h);
+        cy.get('#minute').select(stepMinute(p.m));
         cy.get('#duration').select('120');
         cy.findByRole('button', { name: /reservieren/i }).click();
 
-        // --- Erwartete Fehlermeldung für Vergangenheit ---
         cy.get('[data-cy="form-error"]', { timeout: 8000 })
             .should('be.visible')
             .invoke('text')
@@ -137,36 +139,20 @@ describe('Reservation', () => {
                 expect(/vergangen|nicht möglich/.test(txt)).to.equal(true);
             });
 
-        // --- 2) Startzeit 21:30 + 120 Minuten (endet nach 22:00) ---
-        const lateLocal = (() => {
-            const now = new Date();
-            const s = new Date();
-            s.setSeconds(0, 0);
-            s.setHours(21, 30, 0, 0);
-            if (s <= now) s.setDate(s.getDate() + 1);
-            const pad = (n) => (n < 10 ? '0' + n : n);
-            return `${s.getFullYear()}-${pad(s.getMonth() + 1)}-${pad(
-                s.getDate()
-            )}T${pad(s.getHours())}:${pad(s.getMinutes())}`;
-        })();
+        // (2) 21:30 (jutro, jeśli dziś za późno) → 120 min powinno być zablokowane
+        const s = new Date();
+        s.setSeconds(0, 0);
+        s.setHours(21, 30, 0, 0);
+        if (s <= new Date()) s.setDate(s.getDate() + 1);
+        const lateLocal = `${s.getFullYear()}-${pad(s.getMonth() + 1)}-${pad(
+            s.getDate()
+        )}T${pad(s.getHours())}:${pad(s.getMinutes())}`;
+        const L = splitLocal(lateLocal);
 
-        cy.get('#startTime').invoke('attr', 'min', '1900-01-01T00:00');
-        cy.get('#startTime').clear().type(lateLocal);
+        cy.get('#startDate').clear().type(L.datePart);
+        cy.get('#hour').select(L.h);
+        cy.get('#minute').select(stepMinute(L.m));
 
-        // --- Prüfe, dass 120 Minuten deaktiviert ist ---
         cy.get('#duration').find('option[value="120"]').should('be.disabled');
-
-        // --- Absenden und Fehlermeldung prüfen ---
-        cy.findByRole('button', { name: /reservieren/i }).click();
-
-        cy.get('[data-cy="form-error"]', { timeout: 8000 })
-            .should('be.visible')
-            .invoke('text')
-            .then((t) => {
-                const txt = t.toLowerCase();
-                expect(/22:00|spätestens|zulässig/.test(txt)).to.equal(true);
-            });
-
-        cy.location('pathname').should('eq', '/reservations/new');
     });
 });

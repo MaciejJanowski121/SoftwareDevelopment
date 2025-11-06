@@ -12,8 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
@@ -21,48 +21,42 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
+@ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
-    @Mock
-    private UserRepository userRepository;
+    @Mock private UserRepository userRepository;
+    @Mock private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
+    // Nie używamy bezpośrednio w serwisie, ale zostaje dla zgodności z konstruktorem
+    @Mock private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    // Wird im AuthService-Konstruktor injiziert, hier aber nicht aktiv verwendet
-    @Mock
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    @Mock
-    private JwtService jwtService;
+    @Mock private JwtService jwtService;
 
     @InjectMocks
     private AuthService authService;
 
     private UserRegisterDTO registerDTO;
     private UserLoginDTO loginDTO;
-    private User user;
+    private User user; // istniejący user z hasłem zakodowanym
 
     @BeforeEach
     void setUp() {
-        // --- Register-DTO über leeren Konstruktor + Setter ---
+        // DTO do rejestracji (email = username)
         registerDTO = new UserRegisterDTO();
-        registerDTO.setUsername("testuser");
+        registerDTO.setEmail("testuser@example.com");
         registerDTO.setPassword("password123");
         registerDTO.setFullName("Test User");
-        registerDTO.setEmail("testuser@example.com");
         registerDTO.setPhone("+49 170 0000000");
 
-        // --- Login-DTO über leeren Konstruktor + Setter ---
+        // DTO do logowania
         loginDTO = new UserLoginDTO();
-        loginDTO.setUsername("testuser");
+        loginDTO.setEmail("testuser@example.com");
         loginDTO.setPassword("password123");
 
-        // --- User-Entity entsprechend dem aktuellen Konstruktor (inkl. Profildaten) ---
+        // UŻYJ WŁAŚCIWEGO KONSTRUKTORA USERA: (username, password, role, fullName, email, phone)
         user = new User(
-                "testuser",
-                "encodedPassword",
+                "testuser@example.com",    // username (u Ciebie = email)
+                "encodedPassword",         // zakodowane hasło trzymane w DB
                 Role.ROLE_USER,
                 "Test User",
                 "testuser@example.com",
@@ -71,55 +65,49 @@ class AuthServiceTest {
     }
 
     @Test
-    void testRegister_shouldReturnToken() {
-        // Arrange
+    void register_shouldReturnToken() {
         when(passwordEncoder.encode("password123")).thenReturn("encodedPassword");
-        // Speichern des Users simulieren
+        // save() zwraca zapisany obiekt
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
         when(jwtService.generateToken(any(User.class))).thenReturn("mockToken");
 
-        // Act
         String token = authService.register(registerDTO);
 
-        // Assert
         assertEquals("mockToken", token);
         verify(userRepository).save(any(User.class));
         verify(jwtService).generateToken(any(User.class));
+        // brak innych wywołań nie jest tu konieczne, ale jeśli chcesz:
+        verifyNoMoreInteractions(jwtService);
     }
 
     @Test
-    void testLogin_shouldReturnToken_ifCredentialsAreCorrect() {
-        // Arrange
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+    void login_shouldReturnToken_whenCredentialsAreCorrect() {
+        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password123", "encodedPassword")).thenReturn(true);
         when(jwtService.generateToken(user)).thenReturn("mockToken");
 
-        // Act
         String token = authService.login(loginDTO);
 
-        // Assert
         assertEquals("mockToken", token);
         verify(jwtService).generateToken(user);
     }
 
     @Test
-    void testLogin_shouldThrowException_ifUserNotFound() {
-        // Arrange
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.empty());
+    void login_shouldThrow_whenUserNotFound() {
+        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.empty());
 
-        // Assert
-        assertThrows(UsernameNotFoundException.class, () -> authService.login(loginDTO));
-        verify(jwtService, never()).generateToken(any());
+        assertThrows(BadCredentialsException.class, () -> authService.login(loginDTO));
+
+        verifyNoInteractions(jwtService);
     }
 
     @Test
-    void testLogin_shouldThrowException_ifPasswordInvalid() {
-        // Arrange
-        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+    void login_shouldThrow_whenPasswordInvalid() {
+        when(userRepository.findByEmail("testuser@example.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("password123", "encodedPassword")).thenReturn(false);
 
-        // Assert
         assertThrows(BadCredentialsException.class, () -> authService.login(loginDTO));
-        verify(jwtService, never()).generateToken(any());
+
+        verifyNoInteractions(jwtService);
     }
 }

@@ -25,10 +25,10 @@ public class ReservationSystemApplication {
         return args -> {
 
 
-            if (userRepo.findByUsername("admin").isEmpty()) {
+            if (userRepo.findByEmail("admin@example.com").isEmpty()) {
                 String encodedPassword = encoder.encode("admin123");
                 User admin = new User(
-                        "admin",
+                        "admin@example.com",     // username = email
                         encodedPassword,
                         Role.ROLE_ADMIN,
                         "Administrator",
@@ -36,7 +36,7 @@ public class ReservationSystemApplication {
                         "+49 160 0000000"
                 );
                 userRepo.save(admin);
-                System.out.println("✅ Admin user created.");
+                System.out.println("✅ Admin user created (email-based login).");
             }
 
 

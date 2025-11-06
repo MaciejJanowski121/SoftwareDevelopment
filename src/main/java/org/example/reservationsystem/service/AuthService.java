@@ -1,3 +1,4 @@
+// src/main/java/org/example/reservationsystem/service/AuthService.java
 package org.example.reservationsystem.service;
 
 import org.example.reservationsystem.DTO.UserLoginDTO;
@@ -31,36 +32,34 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
-    // Registrierung inkl. Profildaten
-    public String register(UserRegisterDTO userDTO) {
-        String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
+    // Registrierung ohne Benutzername: wir setzen username = email (stabiler Identifier)
+    public String register(UserRegisterDTO dto) {
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
 
         User newUser = new User(
-                userDTO.getUsername(),
+                /* username */ dto.getEmail(),              // <- username = email
                 encodedPassword,
                 Role.ROLE_USER,
-                userDTO.getFullName(),
-                userDTO.getEmail(),
-                userDTO.getPhone()
+                dto.getFullName(),
+                dto.getEmail(),
+                dto.getPhone()
         );
 
         try {
             userRepository.save(newUser);
         } catch (DataIntegrityViolationException ex) {
-            // z. B. doppelter username/e-mail
             throw ex;
         }
 
         return jwtService.generateToken(newUser);
     }
 
-    // Login mit UserLoginDTO
-    public String login(UserLoginDTO userDTO) {
-        User user = userRepository.findByUsername(userDTO.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public String login(UserLoginDTO dto) {
+        User user = userRepository.findByEmail(dto.getEmail())
+                .orElseThrow(() -> new BadCredentialsException("E-Mail oder Passwort ist falsch."));
 
-        if (!passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Invalid password");
+        if (!passwordEncoder.matches(dto.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException("E-Mail oder Passwort ist falsch.");
         }
 
         return jwtService.generateToken(user);
