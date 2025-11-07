@@ -5,7 +5,7 @@ import ReservationForm from "../components/ReservationForm";
 
 const renderWithRouter = (ui) => render(<BrowserRouter>{ui}</BrowserRouter>);
 
-// helper: jutro w formacie YYYY-MM-DD
+// helper: jutro YYYY-MM-DD
 const pad = (n) => (n < 10 ? "0" + n : "" + n);
 const tomorrowDateStr = () => {
     const d = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -13,7 +13,7 @@ const tomorrowDateStr = () => {
 };
 
 test("zeigt error wenn die Reservierung nicht akzeptiert wird", async () => {
-    // Mock fetch:
+    // Mock fetch
     global.fetch = jest.fn().mockImplementation((input, init = {}) => {
         const url = typeof input === "string" ? input : input.url;
         const method = (init.method || "GET").toUpperCase();
@@ -27,7 +27,7 @@ test("zeigt error wenn die Reservierung nicht akzeptiert wird", async () => {
         }
 
         if (method === "POST" && /\/api\/reservations$/.test(url)) {
-            // 400 – komponent zprefixuje: "Reservierung fehlgeschlagen: Kapazität überschritten"
+            // 400 — komponent wyrenderuje: "Reservierung fehlgeschlagen: Kapazität überschritten"
             return Promise.resolve({
                 ok: false,
                 status: 400,
@@ -47,34 +47,35 @@ test("zeigt error wenn die Reservierung nicht akzeptiert wird", async () => {
     const setReservation = jest.fn();
     renderWithRouter(<ReservationForm setReservation={setReservation} />);
 
-    // ➜ USTAW przyszłość: jutro 18:00 (mieści się w 12:00–21:30)
+    // data
     fireEvent.change(screen.getByLabelText(/Datum/i), {
         target: { value: tomorrowDateStr() },
     });
-    fireEvent.change(screen.getByLabelText(/Stunde/i), { target: { value: "18" } });
-    fireEvent.change(screen.getByLabelText(/Minute/i), { target: { value: "00" } });
 
+    // ⬇️ "Uhrzeit" nie ma htmlFor; wybierz dwa selecty z kontenera tuż po labelu
+    const timeLabel = screen.getByText(/Uhrzeit/i);
+    const timeRow = timeLabel.nextElementSibling; // <div class="time-row">...</div>
+    const [hourSelect, minuteSelect] = within(timeRow).getAllByRole("combobox");
+    fireEvent.change(hourSelect, { target: { value: "18" } });
+    fireEvent.change(minuteSelect, { target: { value: "00" } });
+
+    // Dauer
     fireEvent.change(screen.getByLabelText(/Dauer/i), { target: { value: "120" } });
 
-    // poczekaj na załadowanie stołów
+    // poczekaj aż załadują się stoły i wybierz Tisch 3
     const tableSelect = screen.getByLabelText(/Tisch/i);
     await waitFor(() =>
-        expect(
-            within(tableSelect).getByRole("option", { name: /Tisch\s*3/i })
-        ).toBeInTheDocument()
+        expect(within(tableSelect).getByRole("option", { name: /Tisch\s*3/i })).toBeInTheDocument()
     );
     fireEvent.change(tableSelect, { target: { value: "3" } });
 
     // submit
     fireEvent.click(screen.getByRole("button", { name: /Reservieren/i }));
 
-    // ➜ Oczekuj komunikatu błędu. Komponent przy 400 zrobi prefiks,
-    // ale dla bezpieczeństwa akceptujemy oba warianty.
+    // oczekiwany błąd
     await waitFor(() => {
-        const err =
-            // jeśli dodasz data-testid="form-error" będzie ładniej:
-            screen.queryByTestId?.("form-error") ||
-            screen.getByText(/Kapazität überschritten|Reservierung fehlgeschlagen/i);
-        expect(err).toBeTruthy();
+        expect(
+            screen.getByText(/Reservierung fehlgeschlagen:\s*Kapazität überschritten/i)
+        ).toBeInTheDocument();
     });
 });

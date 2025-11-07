@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Seiten-Komponenten
 import Home from "./pages/Home";
-import NotFound from "./pages/NotFound";
+
 import Reservations from "./pages/Reservations";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
@@ -101,8 +101,7 @@ function App() {
                         }
                     />
 
-                    {/* Fallback für nicht definierte Pfade */}
-                    <Route path="*" element={<NotFound />} />
+
                 </Routes>
             </Router>
         </div>
