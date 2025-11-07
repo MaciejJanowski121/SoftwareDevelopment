@@ -18,6 +18,28 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Integrationsnahe Komponententests für den {@link ReservationService}.
+ *
+ * <p>Die Tests führen echte Datenbankoperationen gegen die Testkonfiguration aus
+ * (durch {@link SpringBootTest} und {@link Transactional}), wodurch persistente
+ * Beziehungen zwischen {@link User}, {@link RestaurantTable} und {@link Reservation}
+ * überprüft werden können.</p>
+ *
+ * <p>Die Tests validieren insbesondere die Geschäftslogik zum Hinzufügen und
+ * Löschen von Reservierungen, einschließlich der Datenkonsistenz zwischen
+ * den beteiligten Entitäten:</p>
+ *
+ * <ul>
+ *   <li>Eine neue Reservierung wird korrekt gespeichert und mit Benutzer und Tisch verknüpft</li>
+ *   <li>Beim Löschen einer Reservierung werden alle bidirektionalen Beziehungen korrekt aufgelöst</li>
+ * </ul>
+ *
+ * <p>Jeder Test läuft in einer eigenen Transaktion, die nach Testende automatisch
+ * zurückgerollt wird, sodass keine Seiteneffekte entstehen.</p>
+ *
+ * author Maciej Janowski
+ */
 @SpringBootTest
 @Transactional
 class ReservationServiceTest {
@@ -34,6 +56,14 @@ class ReservationServiceTest {
     @Autowired
     private UserRepository userRepository;
 
+    /**
+     * Hilfsmethode, um eine Datum-/Uhrzeitkombination für „morgen um HH:MM Uhr“
+     * zu generieren. Sekunden und Nanosekunden werden auf 0 gesetzt.
+     *
+     * @param hour   Stunde (24h-Format)
+     * @param minute Minute
+     * @return {@link LocalDateTime} für den Folgetag
+     */
     private static LocalDateTime tomorrowAt(int hour, int minute) {
         return LocalDateTime.now()
                 .plusDays(1)
@@ -41,16 +71,27 @@ class ReservationServiceTest {
                 .withSecond(0).withNano(0);
     }
 
+    /**
+     * Testet den erfolgreichen Ablauf von {@link ReservationService#addReservation(Reservation, int, String)}.
+     *
+     * <p>Überprüft wird:</p>
+     * <ul>
+     *   <li>Die Reservierung wird in der Datenbank gespeichert (ID generiert)</li>
+     *   <li>Die Entität {@link User} wird korrekt verknüpft</li>
+     *   <li>Der zugehörige {@link RestaurantTable} wird korrekt zugewiesen</li>
+     *   <li>Die Beziehungen sind auch nach Neuladen aus der Datenbank konsistent</li>
+     * </ul>
+     */
     @Test
     void testAddReservation_success() {
-        // given: user + table (UWAGA: przekazujemy poprawny e-mail)
+
         String email = "john@example.com";
         User user = new User(
-                /* password */ "password",
-                /* role     */ Role.ROLE_USER,
-                /* fullName */ "John Doe",
-                /* email    */ email,
-                /* phone    */ "+49 170 1234567"
+                "password",
+                Role.ROLE_USER,
+                "John Doe",
+                email,
+                "+49 170 1234567"
         );
         userRepository.saveAndFlush(user);
 
@@ -61,22 +102,22 @@ class ReservationServiceTest {
         LocalDateTime end   = tomorrowAt(20, 0);
         Reservation reservation = new Reservation(start, end);
 
-        // when: przekazujemy email do addReservation (ReservationService szuka po emailu)
+
         Reservation saved = reservationService.addReservation(reservation, 10, email);
 
-        // then
+
         assertNotNull(saved.getId(), "Reservation ID should be generated");
         assertNotNull(saved.getUser());
-        assertEquals(email, saved.getUser().getEmail());       // źródłowy e-mail
+        assertEquals(email, saved.getUser().getEmail());
         assertNotNull(saved.getTable());
         assertEquals(10, saved.getTable().getTableNumber());
 
-        // użytkownik ma powiązaną rezerwację
+
         User reloadedUser = userRepository.findByEmail(email).orElseThrow();
         assertNotNull(reloadedUser.getReservation());
         assertEquals(saved.getId(), reloadedUser.getReservation().getId());
 
-        // stolik zawiera rezerwację (jeśli kolekcja jest inicjalizowana)
+
         RestaurantTable reloadedTable = tableRepository.findTableByTableNumber(10).orElseThrow();
         assertTrue(
                 reloadedTable.getReservations() != null &&
@@ -85,9 +126,19 @@ class ReservationServiceTest {
         );
     }
 
+    /**
+     * Testet den Löschvorgang einer Reservierung über {@link ReservationService#deleteReservation(Long)}.
+     *
+     * <p>Überprüft wird:</p>
+     * <ul>
+     *   <li>Die Reservierung wird aus der Datenbank entfernt</li>
+     *   <li>Der Benutzer verliert die Referenz auf seine Reservierung</li>
+     *   <li>Der Tisch enthält die gelöschte Reservierung nicht mehr in seiner Liste</li>
+     * </ul>
+     */
     @Test
     void testDeleteReservation() {
-        // given
+
         String email = "max@example.com";
         User user = new User(
                 "password",
@@ -109,18 +160,18 @@ class ReservationServiceTest {
         Long reservationId = saved.getId();
         assertNotNull(reservationRepository.findById(reservationId).orElse(null));
 
-        // when
+
         reservationService.deleteReservation(reservationId);
         reservationRepository.flush();
 
-        // then: rezerwacja usunięta
+
         assertTrue(reservationRepository.findById(reservationId).isEmpty());
 
-        // user odpięty od rezerwacji
+
         User reloadedUser = userRepository.findByEmail(email).orElseThrow();
         assertNull(reloadedUser.getReservation(), "User should not reference a reservation anymore");
 
-        // stolik nie zawiera usuniętej rezerwacji
+
         RestaurantTable reloadedTable = tableRepository.findTableByTableNumber(20).orElseThrow();
         assertTrue(
                 reloadedTable.getReservations() == null ||

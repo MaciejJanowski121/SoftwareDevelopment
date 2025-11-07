@@ -80,6 +80,15 @@ export default function ReservationForm({ setReservation }) {
 
     const availableTables = useAvailableTables(API, start, minutes);
 
+    // jeśli minutes > maxAllowed, przycinamy automatycznie, np. przy 21:30
+    useEffect(() => {
+        if (minutes > maxAllowed) {
+            const clamped = Math.max(MIN_MIN, maxAllowed);
+            setMinutes(clamped);
+            setFormError(""); // czyść ewentualny stary błąd
+        }
+    }, [maxAllowed]); // reaguj na zmianę limitu
+
     useEffect(() => {
         if (!tableNumber) return;
         if (!availableTables.some((t) => String(t.tableNumber) === String(tableNumber))) {
