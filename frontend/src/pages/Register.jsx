@@ -14,19 +14,17 @@ function Register() {
     const [successMsg, setSuccessMsg] = useState("");
 
     const navigate = useNavigate();
-    const API = useMemo(
-        () => process.env.REACT_APP_API_URL || "http://localhost:8080",
-        []
-    );
+    const API = useMemo(() => process.env.REACT_APP_API_URL || "http://localhost:8080", []);
 
     const validEmail = (v) => /\S+@\S+\.\S+/.test(v);
-    const validPhone = (v) => !v || /^(\+?\d{1,3}[\s-]?)?\d{6,15}$/.test(v.trim());
+    const validPhone = (v) => !v || /^[-+()\s0-9]{6,20}$/.test(v.trim());
+
     async function handleSubmit(e) {
         e.preventDefault();
         setErrorMsg("");
         setSuccessMsg("");
 
-        // einfache Client-Validierung
+        // proste sprawdzenia po stronie klienta
         if (fullName.trim().length < 2)
             return setErrorMsg("Bitte den vollständigen Namen angeben.");
         if (!validEmail(email))
@@ -37,15 +35,13 @@ function Register() {
             return setErrorMsg("Passwort muss mindestens 6 Zeichen haben.");
 
         setSubmitting(true);
-
         try {
             const res = await fetch(`${API}/auth/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
-                // falls der Server noch `username` erwartet, verwenden wir die E-Mail
+                // backend nie potrzebuje już username — wysyłamy tylko to:
                 body: JSON.stringify({
-                    username: email,
                     email,
                     password,
                     fullName,
@@ -55,64 +51,46 @@ function Register() {
 
             if (!res.ok) {
                 let msg = "";
-                // Versuche ProblemDetails (application/json) zu lesen
                 try {
-                    const ct = res.headers.get("content-type") || "";
-                    if (ct.includes("application/json")) {
-                        const j = await res.json();
-                        // RFC7807 Felder bevorzugen
-                        msg = j?.detail || j?.title || j?.message || "";
-
-                        // optionale Feldfehler zusammenfassen (falls vorhanden)
-                        if (!msg && j?.fields && typeof j.fields === "object") {
-                            const parts = Object.entries(j.fields).map(
-                                ([k, v]) => `${k}: ${String(v)}`
-                            );
-                            if (parts.length) msg = parts.join(", ");
-                        }
-                    } else {
-                        // z.B. text/plain
-                        const raw = await res.text();
-                        if (raw) msg = raw;
+                    const text = await res.text();
+                    console.log("Server returned:", text);
+                    if (text) {
+                        const j = JSON.parse(text);
+                        const fieldMsg =
+                            j?.fields && typeof j.fields === "object"
+                                ? Object.values(j.fields)[0]
+                                : "";
+                        msg = fieldMsg || j.detail || j.title || j.message || "";
                     }
-                } catch {
-                    // Ignorieren – weiter mit Status-Fallbacks
+                } catch (err) {
+                    console.error("JSON parse error:", err);
                 }
 
                 if (!msg) {
-                    // Fallback nach Statuscode
                     switch (res.status) {
                         case 409:
                             msg = "Diese E-Mail ist bereits vergeben.";
                             break;
                         case 400:
-                        case 422:
-                            msg = "Eingaben sind ungültig. Bitte prüfen.";
-                            break;
-                        case 401:
-                            msg = "Nicht autorisiert.";
-                            break;
-                        case 429:
-                            msg = "Zu viele Versuche. Bitte später erneut versuchen.";
-                            break;
-                        case 500:
-                            msg = "Serverfehler. Bitte später erneut versuchen.";
+                            msg = "Ungültige Eingaben.";
                             break;
                         default:
                             msg = "Registrierung fehlgeschlagen.";
                     }
                 }
 
-                throw new Error(msg);
+                setErrorMsg(msg);   // <-- pokaż użytkownikowi
+                return;             // <-- zakończ funkcję (nie rób throw)
             }
 
-            // Erfolgspfad: Antwort ein einziges Mal als JSON lesen
+            // sukces → czytamy JSON RAZ
             const data = await res.json();
 
+            // username w całej app = email (żeby MyAccount i inne działały spójnie)
             localStorage.setItem(
                 "authUser",
                 JSON.stringify({
-                    username: data.username ?? email,
+                    username: data.username ?? data.email ?? email,
                     fullName: data.fullName ?? fullName,
                     email: data.email ?? email,
                     phone: data.phone ?? phone,
@@ -121,7 +99,7 @@ function Register() {
             );
 
             setSuccessMsg("Registrierung erfolgreich! Weiterleitung...");
-            setTimeout(() => navigate("/myaccount"), 1200);
+            setTimeout(() => navigate("/myaccount"), 900);
         } catch (err) {
             setErrorMsg(err?.message || "Ein Fehler ist aufgetreten.");
         } finally {
@@ -140,14 +118,23 @@ function Register() {
             <section className="auth-card" aria-labelledby="register-title">
                 <h1 id="register-title" className="auth-title">Registrieren</h1>
 
-                {errorMsg && <div className="auth-alert" role="alert">{errorMsg}</div>}
-                {successMsg && <div className="auth-success" role="status">{successMsg}</div>}
+                {errorMsg && (
+                    <div className="auth-alert" role="alert" aria-live="assertive" data-cy="register-error">
+                        {errorMsg}
+                    </div>
+                )}
+                {successMsg && (
+                    <div className="auth-success" role="status" aria-live="polite" data-cy="register-success">
+                        {successMsg}
+                    </div>
+                )}
 
                 <form className="auth-form" onSubmit={handleSubmit} noValidate>
                     <div className="field">
                         <label htmlFor="fullName">Vollständiger Name</label>
                         <input
                             id="fullName"
+                            name="fullName"
                             type="text"
                             autoComplete="name"
                             value={fullName}
@@ -162,10 +149,12 @@ function Register() {
                         <label htmlFor="email">E-Mail</label>
                         <input
                             id="email"
+                            name="email"
                             type="email"
                             autoComplete="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
+                            onBlur={() => setEmail((v) => v.trim().toLowerCase())}
                             required
                         />
                         <small className="hint">Bitte gültige Adresse z. B. name@mail.de</small>
@@ -175,7 +164,10 @@ function Register() {
                         <label htmlFor="phone">Telefon (optional)</label>
                         <input
                             id="phone"
+                            name="phone"
                             type="tel"
+                            inputMode="tel"
+                            pattern="[-+()\s0-9]{6,20}"
                             autoComplete="tel"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
@@ -189,6 +181,7 @@ function Register() {
                         <div className="pwd-wrap">
                             <input
                                 id="password"
+                                name="password"
                                 type={showPwd ? "text" : "password"}
                                 autoComplete="new-password"
                                 value={password}

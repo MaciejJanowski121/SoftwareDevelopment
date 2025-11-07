@@ -12,9 +12,10 @@ import org.example.reservationsystem.model.Role;
 import org.example.reservationsystem.model.User;
 import org.example.reservationsystem.repository.UserRepository;
 import org.example.reservationsystem.service.AuthService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-public class AuthControllerTest {
+@ExtendWith(MockitoExtension.class)
+class AuthControllerTest {
 
     @Mock private AuthService authService;
     @Mock private JwtService jwtService;
@@ -37,58 +39,46 @@ public class AuthControllerTest {
     @InjectMocks
     private AuthController authController;
 
-    AutoCloseable mocks;
-
-    @BeforeEach
-    void setup() {
-        mocks = MockitoAnnotations.openMocks(this);
-    }
-
     // -------- register --------
 
     @Test
     void register_returnsAuthUserAndSetsCookie_onSuccess() {
         UserRegisterDTO dto = new UserRegisterDTO();
-        // frontend wysyła email jako username (dla zgodności ze starym backendem), ale kluczowe jest email
         dto.setEmail("maciej@example.com");
         dto.setPassword("test123");
         dto.setFullName("Maciej");
-        dto.setEmail("maciej@example.com");
         dto.setPhone("+49 111 222");
 
         when(authService.register(dto)).thenReturn("jwt-token");
 
-        // jeśli kontroler po rejestracji odczytuje usera z bazy po emailu — zapewniamy mock:
+        // ⬇️ KRYTYCZNE: kontroler po rejestracji czyta usera z bazy
         User saved = new User(
-                "maciej@example.com", // username = email (spójnie z FE)
-                "hashed",
+                "encoded",             // password (nieistotne w teście)
                 Role.ROLE_USER,
                 "Maciej",
                 "maciej@example.com",
                 "+49 111 222"
         );
-        when(userRepository.findByEmail("maciej@example.com")).thenReturn(Optional.of(saved));
+        when(userRepository.findByEmail("maciej@example.com"))
+                .thenReturn(Optional.of(saved));
 
         ResponseEntity<AuthUserDTO> result = authController.register(dto, response);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         AuthUserDTO body = result.getBody();
         assertNotNull(body);
-        // w FE localStorage.username = email, więc testujemy tak samo
-        assertEquals("maciej@example.com", body.username());
+        assertEquals("maciej@example.com", body.email());
         assertEquals("ROLE_USER", body.role());
         assertEquals("Maciej", body.fullName());
         assertEquals("maciej@example.com", body.email());
         assertEquals("+49 111 222", body.phone());
 
-        // cookie przez Set-Cookie:
-        verify(response).addHeader(eq("Set-Cookie"), argThat(h -> h.contains("token=jwt-token")));
+        verify(response).addHeader(eq("Set-Cookie"),
+                argThat(h -> h.contains("token=jwt-token")));
     }
-
     @Test
     void register_returns409_onDuplicate() {
         UserRegisterDTO dto = new UserRegisterDTO();
-        dto.setEmail("maciej@example.com");
         dto.setEmail("maciej@example.com");
         dto.setPassword("test123");
 
@@ -112,7 +102,6 @@ public class AuthControllerTest {
         when(authService.login(dto)).thenReturn("jwt-token");
 
         User user = new User(
-                "m@example.com",   // username = email
                 "hashed",
                 Role.ROLE_USER,
                 "Maciej J",
@@ -126,7 +115,7 @@ public class AuthControllerTest {
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertTrue(result.getBody() instanceof AuthUserDTO);
         AuthUserDTO body = (AuthUserDTO) result.getBody();
-        assertEquals("m@example.com", body.username()); // FE traktuje to jako username
+        assertEquals("m@example.com", body.email());
         assertEquals("ROLE_USER", body.role());
         assertEquals("Maciej J", body.fullName());
         assertEquals("m@example.com", body.email());
@@ -141,14 +130,13 @@ public class AuthControllerTest {
         dto.setEmail("m@example.com");
         dto.setPassword("bad");
 
-        when(authService.login(dto)).thenThrow(new BadCredentialsException("bad"));
+        when(authService.login(dto)).thenThrow(new BadCredentialsException("E-Mail oder Passwort ist falsch."));
 
         ResponseEntity<?> result = authController.login(dto, response);
 
-        // jeśli kontroler sam zwraca "Login Failed":
         assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
-        assertEquals("Login Failed", result.getBody());
-
+        // jeśli globalny ExceptionHandler zwraca dokładnie ten tekst:
+        assertEquals("E-Mail oder Passwort ist falsch.", result.getBody());
         verify(response, never()).addHeader(eq("Set-Cookie"), anyString());
     }
 
@@ -159,31 +147,26 @@ public class AuthControllerTest {
         Cookie tokenCookie = new Cookie("token", "valid-token");
         when(request.getCookies()).thenReturn(new Cookie[]{ tokenCookie });
 
-        // 1) kontroler wyciąga username z tokena
-        when(jwtService.getUsername("valid-token")).thenReturn("maciej");
+        // kontroler używa getUsername(token) → zwracamy EMAIL
+        when(jwtService.getUsername("valid-token")).thenReturn("m@example.com");
 
-        // 2) ładuje użytkownika
-        User user = new User(
-                "maciej",
-                "pw",
-                Role.ROLE_USER,
-                "Maciej J",
-                "m@example.com",
-                "+49 123"
-        );
-        when(userRepository.findByUsername("maciej")).thenReturn(Optional.of(user));
-
-        // 3) i weryfikuje ważność tokenu względem usera
-        when(jwtService.isTokenValid("valid-token", user)).thenReturn(true);
+        // najpierw spróbuje findByUsername(...), niech będzie pusto:
+        when(userRepository.findByEmail("m@example.com")).thenReturn(Optional.empty());
+        // potem po e-mailu zwracamy użytkownika:
+        User user = new User("pw", Role.ROLE_USER, "Maciej J", "m@example.com", "+49 123");
+        when(userRepository.findByEmail("m@example.com")).thenReturn(Optional.of(user));
 
         ResponseEntity<?> result = authController.checkAuth(request);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertTrue(result.getBody() instanceof AuthUserDTO);
         AuthUserDTO body = (AuthUserDTO) result.getBody();
-        assertEquals("maciej", body.username());
+        assertEquals("m@example.com", body.email());
         assertEquals("ROLE_USER", body.role());
+        assertEquals("Maciej J", body.fullName());
+        assertEquals("m@example.com", body.email());
     }
+
     @Test
     void checkAuth_returns401_whenCookieMissing() {
         when(request.getCookies()).thenReturn(null);
@@ -214,6 +197,6 @@ public class AuthControllerTest {
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         verify(response).addHeader(eq("Set-Cookie"),
-                argThat(h -> h.contains("token=") && h.matches(".*[Mm]ax-[Aa]ge=0.*")));
+                argThat(h -> h.contains("token=") && h.toLowerCase().contains("max-age=0")));
     }
 }

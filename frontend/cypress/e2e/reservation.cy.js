@@ -78,7 +78,7 @@ describe('Reservation', () => {
 
         cy.intercept('POST', '**/api/reservations*', {
             statusCode: 409,
-            headers: { 'content-type': 'text/plain; charset=utf-8' }, // <— DODANE
+            headers: { 'content-type': 'text/plain' },
             body: 'Tisch ist bereits reserviert.',
         }).as('conflict');
 

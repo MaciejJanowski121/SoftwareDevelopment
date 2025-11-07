@@ -1,21 +1,18 @@
 package org.example.reservationsystem.controller;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.example.reservationsystem.DTO.ReservationRequestDTO;
 import org.example.reservationsystem.DTO.ReservationViewDTO;
 import org.example.reservationsystem.DTO.TableViewDTO;
-import org.example.reservationsystem.JWTServices.JwtService;
 import org.example.reservationsystem.model.Reservation;
 import org.example.reservationsystem.service.ReservationService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
@@ -23,48 +20,40 @@ import java.util.List;
 @RequestMapping("/api/reservations")
 public class ReservationController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReservationController.class);
-
     private final ReservationService reservationService;
-    private final JwtService jwtService;
 
-    public ReservationController(ReservationService reservationService, JwtService jwtService) {
+    public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
-        this.jwtService = jwtService;
     }
 
-    // POST /api/reservations — neue reservierung
+    // Erstellt eine Reservierung für den aktuell authentifizierten Benutzer
     @PostMapping
-    public ResponseEntity<ReservationViewDTO> createReservation(HttpServletRequest request,
-                                                                @Valid @RequestBody ReservationRequestDTO dto) {
-        final String username = extractUsernameFromToken(request);
-        if (username == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-
+    public ResponseEntity<ReservationViewDTO> createReservation(
+            @Valid @RequestBody ReservationRequestDTO dto
+    ) {
+        String email = currentEmail(); // aus SecurityContext (Subject = E-Mail)
         Reservation reservation = new Reservation(dto.getStartTime(), dto.getEndTime());
-        Reservation saved = reservationService.addReservation(reservation, dto.getTableNumber(), username);
+        Reservation saved = reservationService.addReservation(reservation, dto.getTableNumber(), email);
         return ResponseEntity.ok(toDto(saved));
     }
 
-    // DELETE /api/reservations/{id}
+    // Löscht eine Reservierung (Security entscheidet, wer darf)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }
 
-    // GET /api/reservations/userReservations — angemeldete benutzer reservierungen (oder 204)
+    // Gibt die Reservierung des aktuellen Benutzers zurück oder 204, wenn keine vorhanden
     @GetMapping("/userReservations")
-    public ResponseEntity<ReservationViewDTO> getUserReservation(HttpServletRequest request) {
-        final String username = extractUsernameFromToken(request);
-        if (username == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-
-        Reservation r = reservationService.getUserReservation(username);
+    public ResponseEntity<ReservationViewDTO> getUserReservation() {
+        String email = currentEmail();
+        Reservation r = reservationService.getUserReservation(email);
         if (r == null) return ResponseEntity.noContent().build();
         return ResponseEntity.ok(toDto(r));
     }
 
-    // GET /api/reservations/all — Alle Reservierungen
+    // Admin: alle Reservierungen
     @GetMapping("/all")
     public ResponseEntity<List<ReservationViewDTO>> getAllReservations() {
         List<ReservationViewDTO> all = reservationService.getAllReservations()
@@ -74,37 +63,42 @@ public class ReservationController {
         return ResponseEntity.ok(all);
     }
 
-    // GET /api/reservations/available?start=YYYY-MM-DDTHH:mm:ss&minutes=...
-
+    // Öffentlicher Check freier Tische
     @GetMapping("/available")
     public ResponseEntity<List<TableViewDTO>> getAvailableTables(
             @RequestParam("start") String startIso,
-            @RequestParam("minutes") Integer minutes) {
-
-        // Przyjmujemy ISO_LOCAL_DATE_TIME z sekundami (frontend już wysyła z sekundami)
-        LocalDateTime start = LocalDateTime.parse(startIso); // np. 2025-10-23T18:00:00
+            @RequestParam("minutes") Integer minutes
+    ) {
+        LocalDateTime start = parseIsoLenient(startIso);
         List<TableViewDTO> free = reservationService.findAvailableTables(start, minutes);
         return ResponseEntity.ok(free);
     }
 
-    // ------------ helpers ------------
+    // -------- helpers --------
 
-    private String extractUsernameFromToken(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) return null;
-        for (Cookie cookie : cookies) {
-            if ("token".equals(cookie.getName())) {
-                try { return jwtService.getUsername(cookie.getValue()); }
-                catch (Exception ignored) { }
-            }
-        }
-        return null;
+    // Holt die E-Mail des eingeloggten Users aus dem SecurityContext
+    private String currentEmail() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        // Bei stateless JWT + erfolgreicher Auth ist auth nie null und getName() = E-Mail
+        return auth.getName();
     }
 
+    // Tolerante ISO-Parsing-Hilfe (mit und ohne Sekunden)
+    private LocalDateTime parseIsoLenient(String iso) {
+        try {
+            return LocalDateTime.parse(iso, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        } catch (Exception e) {
+            return LocalDateTime.parse(iso + ":00", DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        }
+    }
+
+    // Baut das View-DTO inkl. fullName (für schöne Anzeige im Frontend)
     private ReservationViewDTO toDto(Reservation r) {
         return new ReservationViewDTO(
                 r.getId(),
-                r.getUser()  != null ? r.getUser().getUsername() : null,
+                // username im DTO bleibt für Abwärtskompatibilität die E-Mail
+                r.getUser() != null ? r.getUser().getEmail() : null,
+                r.getUser() != null ? r.getUser().getFullName() : null,
                 r.getTable() != null ? r.getTable().getTableNumber() : null,
                 r.getStartTime(),
                 r.getEndTime()

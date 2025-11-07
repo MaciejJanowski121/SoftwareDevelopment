@@ -218,50 +218,65 @@ function ReservationForm({ setReservation }) {
         try {
             const resp = await fetch(`${API}/api/reservations`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {"Content-Type": "application/json"},
                 credentials: "include",
                 body: JSON.stringify(payload),
             });
 
-            // 409 – pokaż komunikat z backendu (ProblemDetail lub text)
+            const ct = resp.headers.get("content-type") || "";
+            const isJson = ct.includes("application/problem+json") || ct.includes("application/json");
+
+            // ...w handleSubmit, tuż po fetch(...)
             if (resp.status === 409) {
-                const ct = resp.headers.get("content-type") || "";
-                let msg = "Tisch ist bereits reserviert.";
+                let msg = "Konflikt.";
                 try {
-                    if (ct.includes("application/json")) {
-                        const j = await resp.json();
-                        msg = j.detail || j.title || JSON.stringify(j);
+                    const ct = (resp.headers.get("content-type") || "").toLowerCase();
+
+                    if (ct.includes("application/json") || ct.includes("application/problem+json")) {
+                        const body = await resp.json(); // ← CZYTAMY JSON TYLKO RAZ
+                        const type = String(body?.type || "");
+
+                        if (type.includes("user-has-reservation")) {
+                            msg = "Du hast bereits eine aktive Reservierung.";
+                        } else if (type.includes("table-already-reserved")) {
+                            msg = "Dieser Tisch ist in dem gewählten Zeitraum bereits reserviert.";
+                        } else {
+                            msg = body.detail || body.title || msg;
+                        }
                     } else {
+                        // np. text/plain
                         msg = (await resp.text()) || msg;
                     }
-                } catch {}
-                setFormError(msg); // <-- NIE nawigujemy
-                return;
-            }
+                } catch (e) {
+                    // zostawiamy msg jak wyżej
+                }
 
+                setFormError(msg);
+                return; // <<< BARDZO WAŻNE: przerwij, żeby catch niżej nie nadpisał komunikatu
+            }
             // Inne 4xx/5xx
             if (!resp.ok) {
-                const ct = resp.headers.get("content-type") || "";
                 let msg = "";
                 try {
-                    msg = ct.includes("application/json")
-                        ? (await resp.json()).detail || (await resp.json()).title || JSON.stringify(await resp.json())
-                        : await resp.text();
-                } catch {}
+                    if (isJson) {
+                        const body = await resp.json();
+                        msg = body.detail || body.title || JSON.stringify(body);
+                    } else {
+                        msg = await resp.text();
+                    }
+                } catch {/* ignore */
+                }
                 throw new Error(msg || `HTTP ${resp.status}`);
             }
 
             // 2xx – sukces
-            const ct = resp.headers.get("content-type") || "";
-            const data = ct.includes("application/json")
-                ? await resp.json()
-                : JSON.parse(await resp.text());
+            const data = isJson ? await resp.json() : JSON.parse(await resp.text());
             setReservation([data]);
             navigate("/reservations/my");
         } catch (err) {
-            setFormError(`Reservierung fehlgeschlagen: ${err.message || err}`);
+            setFormError(`Reservierung fehlgeschlagen: ${err?.message || err}`);
         }
-    };
+    }
 
     /** ------------------ FORMULARZ ------------------ */
     return (

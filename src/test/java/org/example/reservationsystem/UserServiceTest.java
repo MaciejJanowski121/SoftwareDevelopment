@@ -24,7 +24,6 @@ class UserServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    // <<< WAŻNE: mockujemy dokładnie BCryptPasswordEncoder, bo tego używa serwis >>>
     @Mock
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -33,38 +32,50 @@ class UserServiceTest {
 
     @Test
     void loadUserByUsername_UserExists_ReturnsUser() {
+        // email jest jedynym identyfikatorem logowania
+        String email = "john@example.com";
         User user = new User(
-                "john", "encoded", Role.ROLE_USER,
-                "John Doe", "john@example.com", "+49 170 1234567"
+          // jeśli encja wciąż ma pole username, możesz tu podać cokolwiek
+                "encoded",
+                Role.ROLE_USER,
+                "John Doe",
+                email,
+                "+49 170 1234567"
         );
 
-        // Stubuj TYLKO to, czego używa serwis (tu: findByUsername)
-        when(userRepository.findByUsername("john")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
-        var result = userService.loadUserByUsername("john");
-        assertEquals("john", result.getUsername());
+        var result = userService.loadUserByUsername(email);
+        // getUsername() w UserDetails powinno zwracać email (w wariancie email-only)
+        assertEquals(email, result.getUsername());
     }
 
     @Test
     void loadUserByUsername_UserNotFound_ThrowsException() {
-        when(userRepository.findByUsername("unknown")).thenReturn(Optional.empty());
+        String email = "unknown@example.com";
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+
         assertThrows(UsernameNotFoundException.class,
-                () -> userService.loadUserByUsername("unknown"));
+                () -> userService.loadUserByUsername(email));
     }
 
     @Test
     void changePassword_CorrectOldPassword_ChangesPassword() {
+        String email = "john@example.com";
         User user = new User(
-                "john", "oldEncoded", Role.ROLE_USER,
-                "John Doe", "john@example.com", "+49 170 1234567"
+                "oldEncoded",
+                Role.ROLE_USER,
+                "John Doe",
+                email,
+                "+49 170 1234567"
         );
         ChangePasswordDTO dto = new ChangePasswordDTO("old", "new");
 
-        when(userRepository.findByUsername("john")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(bCryptPasswordEncoder.matches("old", "oldEncoded")).thenReturn(true);
         when(bCryptPasswordEncoder.encode("new")).thenReturn("newEncoded");
 
-        userService.changePassword("john", dto);
+        userService.changePassword(email, dto);
 
         verify(userRepository).save(user);
         assertEquals("newEncoded", user.getPassword());
@@ -72,17 +83,21 @@ class UserServiceTest {
 
     @Test
     void changePassword_WrongOldPassword_ThrowsException() {
+        String email = "john@example.com";
         User user = new User(
-                "john", "oldEncoded", Role.ROLE_USER,
-                "John Doe", "john@example.com", "+49 170 1234567"
+                "oldEncoded",
+                Role.ROLE_USER,
+                "John Doe",
+                email,
+                "+49 170 1234567"
         );
         ChangePasswordDTO dto = new ChangePasswordDTO("WRONG", "new");
 
-        when(userRepository.findByUsername("john")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
         when(bCryptPasswordEncoder.matches("WRONG", "oldEncoded")).thenReturn(false);
 
         assertThrows(BadCredentialsException.class,
-                () -> userService.changePassword("john", dto));
+                () -> userService.changePassword(email, dto));
 
         verify(userRepository, never()).save(any());
     }

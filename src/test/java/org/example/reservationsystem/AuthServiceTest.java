@@ -55,7 +55,6 @@ class AuthServiceTest {
 
         // UŻYJ WŁAŚCIWEGO KONSTRUKTORA USERA: (username, password, role, fullName, email, phone)
         user = new User(
-                "testuser@example.com",    // username (u Ciebie = email)
                 "encodedPassword",         // zakodowane hasło trzymane w DB
                 Role.ROLE_USER,
                 "Test User",

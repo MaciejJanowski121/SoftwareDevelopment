@@ -56,7 +56,6 @@ public class ReservationIntegrationTest {
         // Użytkownik – u Was e-mail jest tożsamością, więc username = email
         email = "testuser@example.com";
         testUser = new User(
-                email,                 // username (traktujemy jako e-mail)
                 "{noop}password123",   // hasło nie jest tu weryfikowane
                 Role.ROLE_USER,
                 "Test User",           // fullName

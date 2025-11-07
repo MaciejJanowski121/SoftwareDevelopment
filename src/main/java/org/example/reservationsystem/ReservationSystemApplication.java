@@ -25,11 +25,10 @@ public class ReservationSystemApplication {
         return args -> {
 
 
+// przykład w seederze / CommandLineRunner
             if (userRepo.findByEmail("admin@example.com").isEmpty()) {
-                String encodedPassword = encoder.encode("admin123");
                 User admin = new User(
-                        "admin@example.com",     // username = email
-                        encodedPassword,
+                        encoder.encode("admin123"),
                         Role.ROLE_ADMIN,
                         "Administrator",
                         "admin@example.com",
@@ -38,7 +37,6 @@ public class ReservationSystemApplication {
                 userRepo.save(admin);
                 System.out.println("✅ Admin user created (email-based login).");
             }
-
 
             int[][] tables = {
                     {1, 2}, {2, 3}, {3, 4},

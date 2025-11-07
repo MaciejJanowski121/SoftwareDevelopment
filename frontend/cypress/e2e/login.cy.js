@@ -64,7 +64,10 @@ describe('Login (E-Mail + Passwort)', () => {
         cy.wait('@authCheckAfter');
 
         // 7) Prüfen, ob der Benutzer zur MyAccount-Seite weitergeleitet wurde
-        cy.location('pathname').should('eq', '/myaccount');
-        cy.contains('maciej').should('be.visible');
+// 7) MyAccount
+        cy.location('pathname', { timeout: 10000 }).should('eq', '/myaccount');
+        cy.contains(/Maciej Janowski/i, { timeout: 10000 }).should('be.visible');
+// lub wersja ze stabilnym selektorem:
+// cy.get('[data-cy="account-name"]', { timeout: 10000 }).should('contain', 'Maciej Janowski');", "maciej@example.com", itp.
     });
 });

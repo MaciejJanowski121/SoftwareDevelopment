@@ -1,16 +1,16 @@
 package org.example.reservationsystem;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import org.example.reservationsystem.DTO.ReservationRequestDTO;
 import org.example.reservationsystem.DTO.TableViewDTO;
-import org.example.reservationsystem.JWTServices.JwtService;
 import org.example.reservationsystem.controller.ReservationController;
 import org.example.reservationsystem.model.Reservation;
 import org.example.reservationsystem.service.ReservationService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,27 +21,34 @@ import static org.mockito.Mockito.*;
 class ReservationControllerTest {
 
     private ReservationService reservationService;
-    private JwtService jwtService;
     private ReservationController reservationController;
 
     @BeforeEach
     void setUp() {
         reservationService = mock(ReservationService.class);
-        jwtService = mock(JwtService.class);
-        reservationController = new ReservationController(reservationService, jwtService);
+        reservationController = new ReservationController(reservationService);
+        // domyślnie „zalogowany” użytkownik; testy 401 same wyczyszczą kontekst
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("testuser@example.com", null, List.of())
+        );
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
-    void createReservation_shouldReturnUnauthorized_whenTokenMissing() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getCookies()).thenReturn(null);
+    void createReservation_shouldReturnUnauthorized_whenNoAuthentication() {
+        // brak zalogowanego użytkownika
+        SecurityContextHolder.clearContext();
 
         ReservationRequestDTO dto = new ReservationRequestDTO();
         dto.setTableNumber(1);
         dto.setStartTime(LocalDateTime.of(2025, 10, 30, 18, 0));
         dto.setEndTime(LocalDateTime.of(2025, 10, 30, 20, 0));
 
-        ResponseEntity<?> resp = reservationController.createReservation(request, dto);
+        ResponseEntity<?> resp = reservationController.createReservation(dto);
 
         assertEquals(401, resp.getStatusCodeValue());
         assertNull(resp.getBody());
@@ -49,13 +56,8 @@ class ReservationControllerTest {
     }
 
     @Test
-    void createReservation_shouldReturnOk_whenValidTokenAndPayload() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getCookies()).thenReturn(new Cookie[]{ new Cookie("token", "validToken") });
-
-        // ⬇️ JWT zwraca e-mail
-        when(jwtService.getUsername("validToken")).thenReturn("testuser@example.com");
-
+    void createReservation_shouldReturnOk_whenAuthenticatedAndPayloadValid() {
+        // w setUp ustawiliśmy e-mail = testuser@example.com
         ReservationRequestDTO dto = new ReservationRequestDTO();
         dto.setTableNumber(5);
         LocalDateTime start = LocalDateTime.of(2025, 10, 30, 18, 0);
@@ -69,7 +71,7 @@ class ReservationControllerTest {
         when(reservationService.addReservation(any(Reservation.class), eq(5), eq("testuser@example.com")))
                 .thenReturn(saved);
 
-        ResponseEntity<?> resp = reservationController.createReservation(request, dto);
+        ResponseEntity<?> resp = reservationController.createReservation(dto);
 
         assertEquals(200, resp.getStatusCodeValue());
         assertNotNull(resp.getBody());
@@ -87,11 +89,10 @@ class ReservationControllerTest {
     }
 
     @Test
-    void getUserReservation_shouldReturnUnauthorized_whenTokenMissing() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getCookies()).thenReturn(null);
+    void getUserReservation_shouldReturnUnauthorized_whenNoAuthentication() {
+        SecurityContextHolder.clearContext();
 
-        ResponseEntity<?> resp = reservationController.getUserReservation(request);
+        ResponseEntity<?> resp = reservationController.getUserReservation();
 
         assertEquals(401, resp.getStatusCodeValue());
         verifyNoInteractions(reservationService);
@@ -99,35 +100,27 @@ class ReservationControllerTest {
 
     @Test
     void getUserReservation_shouldReturnOk_whenReservationExists() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getCookies()).thenReturn(new Cookie[]{ new Cookie("token", "validToken") });
-
-        // ⬇️ e-mail jako „username”
-        when(jwtService.getUsername("validToken")).thenReturn("alice@example.com");
-
+        // e-mail z setUp: testuser@example.com
         Reservation r = new Reservation(
                 LocalDateTime.of(2025, 6, 8, 18, 0),
                 LocalDateTime.of(2025, 6, 8, 20, 0)
         );
         r.setId(7L);
 
-        when(reservationService.getUserReservation("alice@example.com")).thenReturn(r);
+        when(reservationService.getUserReservation("testuser@example.com")).thenReturn(r);
 
-        ResponseEntity<?> resp = reservationController.getUserReservation(request);
+        ResponseEntity<?> resp = reservationController.getUserReservation();
 
         assertEquals(200, resp.getStatusCodeValue());
         assertNotNull(resp.getBody());
-        verify(reservationService).getUserReservation("alice@example.com");
+        verify(reservationService).getUserReservation("testuser@example.com");
     }
 
     @Test
     void getUserReservation_shouldReturnNoContent_whenReservationMissing() {
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getCookies()).thenReturn(new Cookie[]{ new Cookie("token", "validToken") });
-        when(jwtService.getUsername("validToken")).thenReturn("bob@example.com");
-        when(reservationService.getUserReservation("bob@example.com")).thenReturn(null);
+        when(reservationService.getUserReservation("testuser@example.com")).thenReturn(null);
 
-        ResponseEntity<?> resp = reservationController.getUserReservation(request);
+        ResponseEntity<?> resp = reservationController.getUserReservation();
 
         assertEquals(204, resp.getStatusCodeValue());
     }

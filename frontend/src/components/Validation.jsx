@@ -52,7 +52,11 @@ export default function Validation({ children }) {
     if (isLoading) return <p>Authentifizierung wird überprüft...</p>;
 
     // Wenn autorisiert → Kindkomponente mit zusätzlichen Props zurückgeben
+    const localUser = JSON.parse(localStorage.getItem("authUser") || "{}");
+
     return authorized && username
         ? React.cloneElement(children, { username, role })
-        : null; // sonst nichts anzeigen
+        : localUser.username
+            ? React.cloneElement(children, { username: localUser.username, role: localUser.role })
+            : null;
 }

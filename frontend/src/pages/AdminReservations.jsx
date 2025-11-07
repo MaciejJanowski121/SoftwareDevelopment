@@ -95,7 +95,7 @@ function AdminReservations() {
                         {reservations.map(res => (
                             <li key={res.id} className="res-row">
                                 <div className="reservation-info">
-                                    <div><strong>Benutzer:</strong> {res.username ?? "–"}</div>
+                                    <div><strong>Benutzer:</strong> {res.fullName || res.username || "–"}</div>
                                     <div><strong>Tisch:</strong> {res.tableNumber ?? "?"}</div>
                                     <div><strong>Zeit:</strong> {formatDateTime(res.startTime, res.endTime)}</div>
                                 </div>

@@ -24,26 +24,33 @@ function Login() {
                 credentials: "include",
                 body: JSON.stringify({ email, password }),
             });
-
             if (!res.ok) {
                 let msg = "";
-                // spróbuj JSON (ProblemDetail / JSON z backendu)
                 try {
                     const ct = res.headers.get("content-type") || "";
-                    if (ct.includes("application/json")) {
+                    const isJson = ct.includes("application/json") || ct.includes("application/problem+json");
+                    if (isJson) {
                         const j = await res.json();
-                        // RFC7807: detail/title; fallback na message
-                        msg = j?.detail || j?.title || j?.message || "";
-                        // walidacja: możesz wyciągnąć np. j.fields i złożyć komunikat
-                        // if (j?.fields && typeof j.fields === "object") { ... }
+                        // 1) priorytet: komunikat walidacyjny z pól (np. email)
+                        const fieldMsg =
+                            j?.fields && typeof j.fields === "object"
+                                ? // weź najpierw email, a jak nie ma – pierwszy komunikat z mapy
+                                (j.fields.email ??
+                                    Object.values(j.fields)[0])
+                                : "";
+
+                        // 2) standardowe pola RFC7807
+                        msg = fieldMsg || j?.detail || j?.title || j?.message || "";
                     }
                 } catch {
-                    // ignorujemy – spróbujemy fallbacków niżej
+                    // ignorujemy – przejdziemy do fallbacków
                 }
 
                 if (!msg) {
-                    // fallback po statusie (gdy brak JSON)
                     switch (res.status) {
+                        case 400:
+                            msg = "Bitte eine gültige E-Mail eingeben.";
+                            break;
                         case 401:
                         case 404:
                             msg = "E-Mail oder Passwort ist falsch.";
@@ -62,13 +69,14 @@ function Login() {
                 throw new Error(msg);
             }
 
-            // OK -> czytamy JSON raz
+            // OK
             const data = await res.json();
+            const username = data.username || data.email;
 
             localStorage.setItem(
                 "authUser",
                 JSON.stringify({
-                    username: data.username, // u Ciebie to e-mail
+                    username,            // alias na email
                     role: data.role,
                     fullName: data.fullName,
                     email: data.email,
@@ -76,14 +84,14 @@ function Login() {
                 })
             );
 
-            if (data.role === "ROLE_ADMIN") navigate("/admin");
-            else navigate("/myaccount");
+            navigate(data.role === "ROLE_ADMIN" ? "/admin" : "/myaccount");
         } catch (err) {
             setErrorMsg(err?.message || "Ein Fehler ist aufgetreten.");
         } finally {
             setSubmitting(false);
         }
     }
+
     const isDisabled = submitting || !email.trim() || !password;
 
     return (
@@ -91,11 +99,7 @@ function Login() {
             <section className="auth-card" aria-labelledby="login-title">
                 <h1 id="login-title" className="auth-title">Login</h1>
 
-                {errorMsg && (
-                    <div className="auth-alert" role="alert">
-                        {errorMsg}
-                    </div>
-                )}
+                {errorMsg && <div className="auth-alert" role="alert">{errorMsg}</div>}
 
                 <form className="auth-form" onSubmit={handleSubmit} noValidate>
                     <div className="field">

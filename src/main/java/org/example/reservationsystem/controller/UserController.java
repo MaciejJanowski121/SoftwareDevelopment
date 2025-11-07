@@ -15,33 +15,37 @@ public class UserController {
 
     private final UserService userService;
 
-    // Konstruktorinjektion
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
-    /** Liefert Profildaten des eingeloggten Benutzers. */
+    /** Gibt das Profil des aktuell eingeloggten Benutzers zurück. */
     @GetMapping("/me")
     public ResponseEntity<UserProfileDTO> me(@AuthenticationPrincipal User currentUser) {
-        if (currentUser == null) return ResponseEntity.status(401).build();
-        UserProfileDTO dto = userService.getProfile(currentUser.getUsername());
-        return ResponseEntity.ok(dto);
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+        return ResponseEntity.ok(userService.getProfile(currentUser.getUsername()));
     }
 
     /** Aktualisiert Profildaten (fullName, email, phone) des eingeloggten Benutzers. */
     @PutMapping("/me")
     public ResponseEntity<Void> updateMe(@AuthenticationPrincipal User currentUser,
                                          @RequestBody UserProfileDTO dto) {
-        if (currentUser == null) return ResponseEntity.status(401).build();
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
         userService.updateProfile(currentUser.getUsername(), dto);
         return ResponseEntity.noContent().build();
     }
 
-    /** Passwort ändern – nur für eingeloggte Benutzer. */
+    /** Ändert das Passwort des eingeloggten Benutzers. */
     @PutMapping("/change-password")
-    public ResponseEntity<?> changePassword(@AuthenticationPrincipal User currentUser,
-                                            @RequestBody ChangePasswordDTO changePasswordDTO) {
-        if (currentUser == null) return ResponseEntity.status(401).build();
+    public ResponseEntity<String> changePassword(@AuthenticationPrincipal User currentUser,
+                                                 @RequestBody ChangePasswordDTO changePasswordDTO) {
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
         userService.changePassword(currentUser.getUsername(), changePasswordDTO);
         return ResponseEntity.ok("Password changed successfully.");
     }

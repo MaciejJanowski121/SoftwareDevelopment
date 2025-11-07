@@ -5,9 +5,7 @@ import org.example.reservationsystem.DTO.UserProfileDTO;
 import org.example.reservationsystem.model.User;
 import org.example.reservationsystem.repository.UserRepository;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,57 +13,83 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UserService implements UserDetailsService {
 
-    private final UserRepository userRepo;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepo, BCryptPasswordEncoder bCryptPasswordEncoder) {
-        this.userRepo = userRepo;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+        this.userRepository   = userRepository;
+        this.passwordEncoder  = passwordEncoder;
     }
 
+    /**
+     * Wird von Spring Security verwendet – loginName = E-Mail.
+     */
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepo.findByUsername(username)
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        return userRepository.findByEmail(normalize(email))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    /** Liest Profildaten des Benutzers und mappt auf DTO. */
+    /**
+     * Gibt das Benutzerprofil als DTO zurück.
+     */
     @Transactional(readOnly = true)
-    public UserProfileDTO getProfile(String username) {
-        User u = userRepo.findByUsername(username)
+    public UserProfileDTO getProfile(String email) {
+        User user = userRepository.findByEmail(normalize(email))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
         UserProfileDTO dto = new UserProfileDTO();
-        dto.setFullName(u.getFullName());
-        dto.setEmail(u.getEmail());
-        dto.setPhone(u.getPhone());
+        dto.setFullName(user.getFullName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
         return dto;
     }
 
-    /** Aktualisiert Profildaten (vollständig oder teilweise – je pożądane). */
+    /**
+     * Aktualisiert Profilinformationen (Name, E-Mail, Telefon).
+     */
     @Transactional
-    public void updateProfile(String username, UserProfileDTO dto) {
-        User u = userRepo.findByUsername(username)
+    public void updateProfile(String email, UserProfileDTO dto) {
+        User user = userRepository.findByEmail(normalize(email))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // Proste nadpisanie; jeśli chcesz partial update, dodaj null-checki
-        if (dto.getFullName() != null) u.setFullName(dto.getFullName());
-        if (dto.getEmail() != null)    u.setEmail(dto.getEmail());
-        if (dto.getPhone() != null)    u.setPhone(dto.getPhone());
+        if (dto.getFullName() != null && !dto.getFullName().isBlank()) {
+            user.setFullName(dto.getFullName().trim());
+        }
+        if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
+            user.setEmail(dto.getEmail().trim().toLowerCase());
+        }
+        if (dto.getPhone() != null && !dto.getPhone().isBlank()) {
+            user.setPhone(dto.getPhone().trim());
+        }
 
-        userRepo.save(u);
+        userRepository.save(user);
     }
 
-    /** Ändert das Passwort des Benutzers (prüft altes Passwort). */
+    /**
+     * Ändert das Passwort des Benutzers, nachdem das alte überprüft wurde.
+     */
     @Transactional
-    public void changePassword(String username, ChangePasswordDTO changePasswordDTO) {
-        User user = userRepo.findByUsername(username)
+    public void changePassword(String email, ChangePasswordDTO dto) {
+        User user = userRepository.findByEmail(normalize(email))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        if (!bCryptPasswordEncoder.matches(changePasswordDTO.getOldPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Old password is incorrect");
+        if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Old password is incorrect.");
         }
-        user.setPassword(bCryptPasswordEncoder.encode(changePasswordDTO.getNewPassword()));
-        userRepo.save(user);
+
+        if (dto.getNewPassword() == null || dto.getNewPassword().length() < 6) {
+            throw new IllegalArgumentException("New password must be at least 6 characters long.");
+        }
+
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    // ---------------- helpers ----------------
+
+    private static String normalize(String email) {
+        return email == null ? null : email.trim().toLowerCase();
     }
 }

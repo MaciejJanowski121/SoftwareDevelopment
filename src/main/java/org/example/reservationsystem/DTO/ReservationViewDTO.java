@@ -4,7 +4,8 @@ import java.time.LocalDateTime;
 
 public record ReservationViewDTO(
         Long id,
-        String username,
+        String email,
+        String fullName,
         Integer tableNumber,
         LocalDateTime startTime,
         LocalDateTime endTime
