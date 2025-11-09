@@ -4,6 +4,30 @@ import { BrowserRouter } from "react-router-dom";
 
 const renderWithRouter = (ui) => render(<BrowserRouter>{ui}</BrowserRouter>);
 
+/**
+ * Integrationstest für die Seite <code>Reservations.jsx</code>.
+ *
+ * <p>Dieser Test überprüft die Anzeige und das Löschen einer Benutzer-Reservierung.</p>
+ *
+ * <ul>
+ *   <li>Mockt die API-Aufrufe:
+ *     <ul>
+ *       <li><code>GET /api/reservations/userReservations</code> – liefert bestehende Reservierung,</li>
+ *       <li><code>DELETE /api/reservations/:id</code> – simuliert erfolgreiche Löschung.</li>
+ *     </ul>
+ *   </li>
+ *   <li>Prüft, dass:
+ *     <ul>
+ *       <li>die Reservierung mit Benutzer, Tisch-Nr. und Uhrzeit korrekt angezeigt wird,</li>
+ *       <li>nach Klick auf „Reservierung löschen“ der entsprechende DELETE-Request ausgeführt wird.</li>
+ *     </ul>
+ *   </li>
+ *   <li>Validiert die Integration von Datenabruf, UI-Darstellung und Benutzerinteraktion.</li>
+ * </ul>
+ *
+ * @component
+ * @returns {void} Führt automatisierte UI-Tests mit React Testing Library aus.
+ */
 describe("Reservations", () => {
     beforeEach(() => {
         global.fetch = jest.fn();

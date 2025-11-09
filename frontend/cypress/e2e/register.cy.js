@@ -1,4 +1,25 @@
-// cypress/e2e/register.cy.js
+
+
+/**
+ * End-to-End-Test für den Registrierungsprozess.
+ *
+ * <p>Dieser Cypress-Test prüft sowohl den erfolgreichen Ablauf der Benutzerregistrierung
+ * als auch den Fehlerszenario bei bereits vorhandener E-Mail-Adresse.</p>
+ *
+ * <ul>
+ *   <li>Mockt den initialen <code>GET /auth/auth_check</code> mit 401 (nicht eingeloggt).</li>
+ *   <li>Simuliert den Aufruf von <code>POST /auth/register</code> mit validen Nutzerdaten.</li>
+ *   <li>Überprüft, dass der Benutzer nach erfolgreicher Registrierung automatisch zu
+ *       <code>/myaccount</code> weitergeleitet wird.</li>
+ *   <li>Testet zusätzlich den Konfliktfall (HTTP 409), bei dem eine bereits existierende
+ *       E-Mail-Adresse eine sichtbare Fehlermeldung im Formular auslöst.</li>
+ *   <li>Verwendet <code>cy.intercept</code> für API-Mocking, um deterministische und isolierte Tests zu ermöglichen.</li>
+ * </ul>
+ *
+ * @test
+ * @framework Cypress
+ * @returns {void} Führt UI-Tests für Erfolg und Fehlerfall der Benutzerregistrierung aus.
+ */
 describe('Registrierung', () => {
     beforeEach(() => {
         cy.clearCookies();
@@ -6,18 +27,15 @@ describe('Registrierung', () => {
     });
 
     it('registriert erfolgreich und navigiert zu /myaccount', () => {
-        // -- Vor dem Besuch: alle Auth-Checks als 401 stubben (bleibt auf /register)
         cy.intercept('GET', '**/auth/auth_check', {
             statusCode: 401,
             headers: { 'content-type': 'application/json' },
             body: 'Unauthorized'
         }).as('auth401');
 
-        // -- Seite öffnen und den ersten Check abwarten
         cy.visit('http://localhost:3000/register');
-        cy.wait('@auth401'); // mindestens ein 401 bestätigt
+        cy.wait('@auth401');
 
-        // -- Registrierungs-POST stubben (prüfen, was Frontend sendet)
         cy.intercept('POST', '**/auth/register', (req) => {
             const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
@@ -38,13 +56,11 @@ describe('Registrierung', () => {
             });
         }).as('register');
 
-        // -- Formular mit IDs ausfüllen (Label-Matcher pomijamy, żeby unikać kolizji)
         cy.get('#fullName').should('exist').type('Max Mustermann');
         cy.get('#email').type('max@example.com');
         cy.get('#phone').type('+491701234567');
         cy.get('#password').type('secret123');
 
-        // -- Jetzt den Auth-Check auf 200 umstellen (erst NACH dem Ausfüllen)
         cy.intercept('GET', '**/auth/auth_check', {
             statusCode: 200,
             headers: { 'content-type': 'application/json' },
@@ -57,41 +73,32 @@ describe('Registrierung', () => {
             }
         }).as('auth200');
 
-        // -- Abschicken
         cy.findByRole('button', { name: /registrieren/i }).click();
 
-        // -- Erst POST abwarten, dann den 200-Auth-Check abwarten
         cy.wait('@register');
         cy.wait('@auth200');
-
-        // -- Weiterleitung prüfen
         cy.location('pathname').should('eq', '/myaccount');
     });
 
     it('zeigt einen Fehler, wenn E-Mail bereits vergeben ist (409)', () => {
-        // -- Standardmäßig 401 lassen (kein Redirect)
         cy.intercept('GET', '**/auth/auth_check', { statusCode: 401 }).as('auth401');
 
         cy.visit('http://localhost:3000/register');
         cy.wait('@auth401');
 
-        // -- 409-Konflikt stubben
         cy.intercept('POST', '**/auth/register', {
             statusCode: 409,
             headers: { 'content-type': 'text/plain' },
             body: 'E-Mail bereits vergeben'
         }).as('registerConflict');
 
-        // -- Formular ausfüllen
         cy.get('#fullName').type('Max Mustermann');
         cy.get('#email').type('max@example.com');
         cy.get('#phone').type('+491701234567');
         cy.get('#password').type('secret123');
 
-        // -- Absenden
         cy.findByRole('button', { name: /registrieren/i }).click();
 
-        // -- Auf 409 warten und Fehler anzeigen prüfen
         cy.wait('@registerConflict');
         cy.findByRole('alert', { timeout: 6000 })
             .should('be.visible')
@@ -104,7 +111,6 @@ describe('Registrierung', () => {
                 ).to.be.true;
             });
 
-        // -- Keine Weiterleitung
         cy.location('pathname').should('eq', '/register');
     });
 });

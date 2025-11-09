@@ -1,9 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-// Seiten-Komponenten
 import Home from "./pages/Home";
-
 import Reservations from "./pages/Reservations";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
@@ -13,27 +11,40 @@ import AdminPanel from "./pages/AdminPanel";
 import NewReservation from "./pages/NewReservation";
 import AdminReservations from "./pages/AdminReservations";
 
-// Gemeinsame Komponenten
 import Header from "./components/Header";
 import Validation from "./components/Validation";
 import IstLoggedCheck from "./components/IstLoggedCheck";
 
 import "./styles/global.css";
 
+/**
+ * Hauptkomponente der React Single-Page-Application (SPA).
+ *
+ * <p>Definiert die komplette Routing-Struktur der Anwendung
+ * mithilfe von <code>react-router-dom</code>. Der Header ist
+ * dauerhaft sichtbar; geschützte Routen sind mit der Komponente
+ * <code>Validation</code> versehen, die den Login-Status prüft.
+ * Seiten wie Login oder Register werden nur angezeigt, wenn
+ * der Benutzer noch nicht eingeloggt ist (<code>IstLoggedCheck</code>).</p>
+ *
+ * <ul>
+ *   <li><strong>Öffentliche Seiten:</strong> Home, Login, Register</li>
+ *   <li><strong>Benutzerbereich:</strong> MyAccount, ChangePassword, Reservations</li>
+ *   <li><strong>Adminbereich:</strong> AdminPanel, AdminReservations</li>
+ * </ul>
+ *
+ * @component
+ * @returns {JSX.Element} Hauptcontainer der App mit Routing.
+ */
 function App() {
     return (
         <div className="app-container">
             <Router>
-
-                {/* Navigationsleiste immer sichtbar */}
                 <Header />
 
-                {/* Routen für die SPA */}
                 <Routes>
-                    {/* Startseite */}
                     <Route path="/" element={<Home />} />
 
-                    {/* Login & Registrierung – nur zugänglich, wenn nicht eingeloggt */}
                     <Route
                         path="/login"
                         element={
@@ -51,7 +62,6 @@ function App() {
                         }
                     />
 
-                    {/* Geschützter Benutzerbereich */}
                     <Route
                         path="/myaccount"
                         element={
@@ -60,12 +70,8 @@ function App() {
                             </Validation>
                         }
                     />
-                    <Route
-                        path="/changePassword"
-                        element={<ChangePassword />}
-                    />
+                    <Route path="/changePassword" element={<ChangePassword />} />
 
-                    {/* Admin-Bereich – nur mit Admin-Rechten sichtbar */}
                     <Route
                         path="/admin"
                         element={
@@ -83,7 +89,6 @@ function App() {
                         }
                     />
 
-                    {/* Reservierungsseiten – ebenfalls geschützt */}
                     <Route
                         path="/reservations/new"
                         element={
@@ -100,8 +105,6 @@ function App() {
                             </Validation>
                         }
                     />
-
-
                 </Routes>
             </Router>
         </div>

@@ -13,6 +13,30 @@ global.fetch = jest.fn();
 
 const renderWithRouter = (ui) => render(<BrowserRouter>{ui}</BrowserRouter>);
 
+/**
+ * Integrationstest für die Login-Seite.
+ *
+ * <p>Dieser Test überprüft das Verhalten der Komponente
+ * <code>Login.jsx</code> in verschiedenen Authentifizierungsszenarien.</p>
+ *
+ * <ul>
+ *   <li>Mockt die Fetch-API für erfolgreiche und fehlgeschlagene Logins.</li>
+ *   <li>Verwendet <code>BrowserRouter</code> und eine gemockte <code>useNavigate</code>-Funktion,
+ *       um Navigationen zu /admin oder /myaccount zu testen.</li>
+ *   <li>Prüft folgende Fälle:
+ *     <ul>
+ *       <li>Rendering der Eingabefelder und Buttons,</li>
+ *       <li>Aktualisierung der Eingaben (E-Mail und Passwort),</li>
+ *       <li>Erfolgreiche Anmeldung und Weiterleitung für <code>ROLE_ADMIN</code>,</li>
+ *       <li>Erfolgreiche Anmeldung und Weiterleitung für <code>ROLE_USER</code>,</li>
+ *       <li>Anzeige einer Fehlermeldung bei falschen Zugangsdaten.</li>
+ *     </ul>
+ *   </li>
+ * </ul>
+ *
+ * @component
+ * @returns {void} Führt automatisierte UI-Tests mit React Testing Library aus.
+ */
 describe("Login", () => {
     beforeEach(() => {
         fetch.mockClear();
@@ -61,7 +85,7 @@ describe("Login", () => {
         fireEvent.click(screen.getByRole("button", { name: /Login/i }));
 
         await waitFor(() => {
-            expect(fetch).toHaveBeenCalled(); // nie blokujemy się na konkretnym body
+            expect(fetch).toHaveBeenCalled();
             expect(mockedUsedNavigate).toHaveBeenCalledWith("/admin");
         });
     });
@@ -106,10 +130,10 @@ describe("Login", () => {
 
         fireEvent.click(screen.getByRole("button", { name: /Login/i }));
 
-        // Twój komponent pokazuje komunikat (np. <div role="alert">…</div>) – asercja na to:
         await waitFor(() => {
-              expect(screen.getByRole("alert"))
-                .toHaveTextContent(/Invalid credentials|Login fehlgeschlagen/i);
-            });
+            expect(screen.getByRole("alert")).toHaveTextContent(
+                /Invalid credentials|Login fehlgeschlagen/i
+            );
+        });
     });
 });

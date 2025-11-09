@@ -1,28 +1,47 @@
+
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoutButton from "../components/LogoutButton";
-import '../styles/adminpanel.css';
+import "../styles/adminpanel.css";
 
-// AdminPanel-Komponente – nur für Nutzer:innen mit ROLE_ADMIN zugänglich
+/**
+ * Administrationsbereich für Benutzer mit der Rolle <code>ROLE_ADMIN</code>.
+ *
+ * <p>Funktionen:</p>
+ * <ul>
+ *   <li>Überprüft die Benutzerrolle beim Rendern und leitet nicht berechtigte Benutzer
+ *       automatisch auf <code>/myaccount</code> weiter.</li>
+ *   <li>Zeigt den eingeloggten Admin-Namen an und bietet Zugriff auf Verwaltungsfunktionen.</li>
+ *   <li>Enthält eine Navigation zur Seite „Alle Reservierungen“ sowie einen Logout-Button.</li>
+ * </ul>
+ *
+ * <p><strong>Verwendung:</strong> Diese Seite wird nur angezeigt, wenn
+ * <code>role === "ROLE_ADMIN"</code>. Sie dient als Einstiegspunkt für
+ * administrative Aktionen im System.</p>
+ *
+ * @component
+ * @param {{ username: string, role: string }} props - Vom Auth-Wrapper übergebene Benutzerinformationen.
+ * @returns {JSX.Element}
+ */
 function AdminPanel({ username, role }) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Wenn der Nutzer keine Admin-Rolle hat, zur normalen Benutzerseite umleiten
         if (role !== "ROLE_ADMIN") {
             navigate("/myaccount");
         }
-    }, [role]);
+    }, [role, navigate]);
 
     return (
         <div className="admin-container">
             <div className="admin-box">
                 <h1>Admin Panel</h1>
                 <p>Willkommen im Adminbereich.</p>
-                <p>Angemeldet als: <strong>{username}</strong></p>
+                <p>
+                    Angemeldet als: <strong>{username}</strong>
+                </p>
 
                 <div className="admin-actions">
-                    {/* Weiterleitung zur Reservierungsliste */}
                     <button
                         onClick={() => navigate("/admin/reservations")}
                         className="account-btn account-btn--primary"
@@ -30,7 +49,6 @@ function AdminPanel({ username, role }) {
                         Alle Reservierungen anzeigen
                     </button>
 
-                    {/* Logout-Button mit rotem Stil */}
                     <LogoutButton className="account-btn account-btn--danger" />
                 </div>
             </div>

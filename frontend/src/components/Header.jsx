@@ -1,69 +1,120 @@
-import { Link, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
-import '../styles/header.css';
+import { NavLink, useLocation } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import "../styles/header.css";
 
+/**
+ * Navigationskopf der Anwendung.
+ *
+ * <p>Diese Komponente zeigt das Marken-Logo und kontextabhängige Navigationslinks.
+ * Sie prüft beim Routenwechsel den Login-Status über <code>/auth/auth_check</code>
+ * (JWT-Cookie) und blendet Menüpunkte für Gäste, Benutzer oder Admins ein.</p>
+ *
+ * <ul>
+ *   <li>Verwendet <code>NavLink</code> für automatische "active"-Klassen.</li>
+ *   <li>Verwendet <em>AbortController</em>, um Race Conditions bei schnellen Routenwechseln zu vermeiden.</li>
+ *   <li>Hält einen Ladezustand (<code>isLoading</code>) für saubere UI.</li>
+ * </ul>
+ *
+ * @component
+ * @returns {JSX.Element} Navigationsleiste der Anwendung.
+ */
 function Header() {
     const location = useLocation();
+    const API = useMemo(() => "http://localhost:8080", []);
+
+    /** Zustand: ob der Benutzer eingeloggt ist. */
     const [isLogged, setIsLogged] = useState(false);
+    /** Zustand: Rolle des Benutzers (z. B. "ROLE_ADMIN"). */
     const [role, setRole] = useState(null);
+    /** Zustand: Ladeindikator für den Auth-Check. */
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const check = async () => {
+        const ctrl = new AbortController();
+
+        (async () => {
+            if (!ctrl.signal.aborted) setIsLoading(true);
             try {
-                const res = await fetch("http://localhost:8080/auth/auth_check", {
+                const res = await fetch(`${API}/auth/auth_check`, {
                     credentials: "include",
+                    signal: ctrl.signal,
                 });
 
-                if (res.ok) {
-                    const data = await res.json();
-                    setIsLogged(true);
-                    setRole(data.role);
-                } else {
+                if (ctrl.signal.aborted) return;
+
+                if (!res.ok) {
+                    setIsLogged(false);
+                    setRole(null);
+                    return;
+                }
+
+                const data = await res.json();
+                setIsLogged(true);
+                setRole(data?.role ?? null);
+            } catch {
+                if (!ctrl.signal.aborted) {
                     setIsLogged(false);
                     setRole(null);
                 }
-            } catch {
-                setIsLogged(false);
-                setRole(null);
+            } finally {
+                if (!ctrl.signal.aborted) setIsLoading(false);
             }
-        };
+        })();
 
-        check();
-    }, [location.pathname]);
+        return () => ctrl.abort();
+    }, [API, location.pathname]);
 
     return (
         <header className="navbar">
             <div className="navbar-container">
-                {/* Logo / Brand */}
                 <div className="navbar-logo">
-                    <Link to="/">Restaurant</Link>
+                    <NavLink to="/" className="brand">
+                        Restaurant
+                    </NavLink>
                 </div>
 
-                {/* Links */}
                 <nav className="navbar-links">
-                    <Link to="/" className={location.pathname === "/" ? "active" : ""}>Home</Link>
+                    <NavLink
+                        to="/"
+                        className={({ isActive }) => (isActive ? "active" : undefined)}
+                        end
+                    >
+                        Home
+                    </NavLink>
 
-                    {!isLogged && (
+                    {!isLoading && !isLogged && (
                         <>
-                            <Link to="/register" className={location.pathname === "/register" ? "active" : ""}>
+                            <NavLink
+                                to="/register"
+                                className={({ isActive }) => (isActive ? "active" : undefined)}
+                            >
                                 Register
-                            </Link>
-                            <Link to="/login" className={location.pathname === "/login" ? "active" : ""}>
+                            </NavLink>
+                            <NavLink
+                                to="/login"
+                                className={({ isActive }) => (isActive ? "active" : undefined)}
+                            >
                                 Login
-                            </Link>
+                            </NavLink>
                         </>
                     )}
 
-                    {isLogged && role !== "ROLE_ADMIN" && (
-                        <Link to="/myaccount" className={location.pathname === "/myaccount" ? "active" : ""}>
+                    {!isLoading && isLogged && role !== "ROLE_ADMIN" && (
+                        <NavLink
+                            to="/myaccount"
+                            className={({ isActive }) => (isActive ? "active" : undefined)}
+                        >
                             My Account
-                        </Link>
+                        </NavLink>
                     )}
 
-                    {isLogged && role === "ROLE_ADMIN" && (
-                        <Link to="/admin" className={location.pathname === "/admin" ? "active" : ""}>
+                    {!isLoading && isLogged && role === "ROLE_ADMIN" && (
+                        <NavLink
+                            to="/admin"
+                            className={({ isActive }) => (isActive ? "active" : undefined)}
+                        >
                             Admin Panel
-                        </Link>
+                        </NavLink>
                     )}
                 </nav>
             </div>

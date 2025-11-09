@@ -8,96 +8,55 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cf3b961a-aef8-488d-92e9-8e49d1d3c85a" name="Changes" comment="Iniit">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/cypress/e2e/admin.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/cypress/e2e/admin.cy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/cypress/e2e/login.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/cypress/e2e/login.cy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/cypress/e2e/register.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/cypress/e2e/register.cy.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/cypress/e2e/reservation.cy.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/cypress/e2e/reservation.cy.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/.eslintcache" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/.eslintcache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/0.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/0.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/1.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/1.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/10.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/10.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/11.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/11.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/12.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/12.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/13.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/13.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/14.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/14.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/15.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/15.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/2.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/2.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/3.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/3.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/4.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/4.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/5.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/5.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/6.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/6.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/7.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/7.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/8.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/8.pack" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/9.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/9.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/index.pack" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/index.pack" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/index.pack.old" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/node_modules/.cache/default-development/index.pack.old" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/ChangePassword.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ChangePassword.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Header.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/IstLoggedCheck.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/IstLoggedCheck.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/LogoutButton.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/LogoutButton.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/components/ReservationForm.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/ReservationForm.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/AuthUserDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/AuthUserDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/ChangePasswordDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/ChangePasswordDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/ReservationRequestDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/ReservationRequestDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/ReservationViewDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/ReservationViewDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/TableViewDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/TableViewDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/UserLoginDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/UserLoginDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/UserProfileDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/UserProfileDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/UserRegisterDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/DTO/UserRegisterDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/JWTServices/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/JWTServices/JwtAuthenticationFilter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/JWTServices/JwtService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/JWTServices/JwtService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/ReservationSystemApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/ReservationSystemApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/config/ApplicationConfiguration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/config/ApplicationConfiguration.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/config/CorsConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/config/CorsConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/controller/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/controller/ReservationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/controller/ReservationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/controller/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/controller/UserController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/BusinessRuleViolationException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/BusinessRuleViolationException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/GlobalExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/ReservationNotFoundException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/ReservationNotFoundException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/TableAlreadyReservedException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/TableAlreadyReservedException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/TableNotFoundException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/TableNotFoundException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/UserAlreadyHasReservationException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/UserAlreadyHasReservationException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/UserNotFoundException.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/exceptions/UserNotFoundException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/model/Reservation.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/model/Reservation.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/model/RestaurantTable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/model/RestaurantTable.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/model/Role.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/model/Role.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/model/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/model/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/repository/ReservationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/repository/ReservationRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/repository/TableRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/repository/TableRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/repository/UserRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/repository/UserRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/service/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/service/ReservationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/service/ReservationService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/service/TableService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/service/TableService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/reservationsystem/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/AuthControllerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/AuthControllerTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/AuthIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/AuthIntegrationTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/AuthServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/AuthServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/JwtServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/JwtServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/ReservationControllerTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/ReservationControllerTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/ReservationIntegrationTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/ReservationIntegrationTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/ReservationServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/ReservationServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/UserServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/org/example/reservationsystem/UserServiceTest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/AuthUserDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/AuthUserDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/ChangePasswordDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/ChangePasswordDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/ReservationRequestDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/ReservationRequestDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/ReservationViewDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/ReservationViewDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/TableViewDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/TableViewDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/UserLoginDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/UserLoginDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/UserProfileDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/UserProfileDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/UserRegisterDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/DTO/UserRegisterDTO.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/JWTServices/JwtAuthenticationFilter.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/JWTServices/JwtAuthenticationFilter.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/JWTServices/JwtService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/JWTServices/JwtService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/config/ApplicationConfiguration.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/config/ApplicationConfiguration.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/config/CorsConfig$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/config/CorsConfig$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/config/CorsConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/config/CorsConfig.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/controller/AuthController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/controller/AuthController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/controller/ReservationController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/controller/ReservationController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/controller/UserController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/controller/UserController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/BusinessRuleViolationException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/BusinessRuleViolationException.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/GlobalExceptionHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/GlobalExceptionHandler.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/ReservationNotFoundException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/ReservationNotFoundException.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/TableAlreadyReservedException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/TableAlreadyReservedException.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/TableNotFoundException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/TableNotFoundException.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/UserAlreadyHasReservationException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/UserAlreadyHasReservationException.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/UserNotFoundException.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/exceptions/UserNotFoundException.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/model/Reservation.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/model/Reservation.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/model/RestaurantTable.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/model/RestaurantTable.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/model/Role.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/model/Role.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/model/User.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/model/User.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/service/AuthService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/service/AuthService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/service/ReservationService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/service/ReservationService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/service/TableService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/service/TableService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/service/UserService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/service/UserService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/AuthControllerTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/AuthControllerTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/AuthIntegrationTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/AuthIntegrationTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/AuthServiceTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/AuthServiceTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/JwtServiceTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/JwtServiceTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/ReservationControllerTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/ReservationControllerTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/ReservationIntegrationTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/ReservationIntegrationTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/ReservationServiceTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/ReservationServiceTest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/UserServiceTest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/org/example/reservationsystem/UserServiceTest.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Validation.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Validation.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminPanel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminPanel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminReservations.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminReservations.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Home.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Home.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Login.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/MyAccount.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/MyAccount.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/NewReservation.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/NewReservation.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Register.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Register.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Reservations.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Reservations.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/setupTests.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/setupTests.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/styles/changepassword.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/styles/changepassword.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/tests/AdminPanl.test.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/tests/AdminPanl.test.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/tests/AdminReservation.test.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/tests/AdminReservation.test.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/tests/Login.test.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/tests/Login.test.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/tests/Register.test.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/tests/Register.test.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/tests/ReservationForm.test.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/tests/ReservationForm.test.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/tests/Reservations.test.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/tests/Reservations.test.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/ReservationSystemApplication.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/org/example/reservationsystem/ReservationSystemApplication.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -143,37 +102,37 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "JUnit.AuthControllerTest.executor": "Run",
-    "JUnit.AuthIntegrationTest.executor": "Run",
-    "JUnit.AuthServiceTest.executor": "Run",
-    "JUnit.JwtServiceTest.executor": "Run",
-    "JUnit.ReservationControllerTest.executor": "Run",
-    "JUnit.ReservationIntegrationTest.executor": "Run",
-    "JUnit.ReservationServiceTest.executor": "Run",
-    "JUnit.UserServiceTest.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.ReservationSystemApplication.executor": "Run",
-    "git-widget-placeholder": "main",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "/Users/maciejjanowski/Desktop/reservationSystem",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.keymap",
-    "ts.external.directory.path": "/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;JUnit.AuthControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AuthIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.AuthServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.JwtServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.ReservationControllerTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.ReservationIntegrationTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.ReservationServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;JUnit.UserServiceTest.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.ReservationSystemApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/maciejjanowski/Desktop/reservationSystem&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Applications/IntelliJ IDEA.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/frontend/src/styles" />
@@ -240,7 +199,8 @@
       <workItem from="1762440681818" duration="14620000" />
       <workItem from="1762455832027" duration="24000" />
       <workItem from="1762462162572" duration="18494000" />
-      <workItem from="1762516013206" duration="17031000" />
+      <workItem from="1762516013206" duration="17119000" />
+      <workItem from="1762695907721" duration="6881000" />
     </task>
     <task id="LOCAL-00001" summary="cleanup: remove leftover reservationSystem folder">
       <option name="closed" value="true" />
@@ -278,6 +238,12 @@
           <url>file://$PROJECT_DIR$/src/main/java/org/example/reservationsystem/controller/AuthController.java</url>
           <line>141</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/frontend/src/components/ReservationForm.jsx</url>
+          <line>120</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

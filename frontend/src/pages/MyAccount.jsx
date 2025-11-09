@@ -3,8 +3,23 @@ import { Link } from "react-router-dom";
 import { useMemo } from "react";
 import LogoutButton from "../components/LogoutButton";
 
+/**
+ * Benutzerkonto-Seite.
+ *
+ * <p>Zeigt grundlegende Kontoinformationen und kontextsensitive Aktionen.
+ * Liest – falls nicht via Props geliefert – ein Fallback-Objekt aus
+ * <code>localStorage</code> (Key: <code>authUser</code>).</p>
+ *
+ * <ul>
+ *   <li>Nicht-Admin: neue Reservierung, eigene Reservierungen, Passwort ändern, Logout.</li>
+ *   <li>Admin: Hinweis + Link zum Admin-Panel, Logout.</li>
+ * </ul>
+ *
+ * @component
+ * @param {{ username?: string, role?: string }} props
+ * @returns {JSX.Element}
+ */
 function MyAccount(props) {
-    // 1) Fallback na localStorage, jeśli props nie przyszły
     const stored = useMemo(() => {
         try {
             return JSON.parse(localStorage.getItem("authUser") || "{}");
@@ -17,7 +32,6 @@ function MyAccount(props) {
     const role = props?.role ?? stored?.role ?? "";
     const fullName = stored?.fullName ?? "";
 
-    // 2) Co pokazać jako nagłówek
     const displayName = fullName || username || "Benutzer";
     const initial =
         (fullName?.trim()?.charAt(0)) ||
@@ -27,7 +41,6 @@ function MyAccount(props) {
     return (
         <div className="account-container">
             <div className="account-box">
-                {/* Header */}
                 <div className="account-header">
                     <div className="account-avatar">
                         {String(initial).toUpperCase()}
@@ -38,7 +51,6 @@ function MyAccount(props) {
                     </p>
                 </div>
 
-                {/* Sekcja akcji – tylko dla nie-adminów */}
                 {role !== "ROLE_ADMIN" ? (
                     <div className="account-actions">
                         <Link to="/reservations/new" className="account-btn account-btn--gold">

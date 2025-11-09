@@ -2,6 +2,24 @@ import "../styles/loginAndRegister.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 
+/**
+ * Registrierungsseite für neue Benutzer.
+ *
+ * <p>Rendert ein Formular mit Feldern <code>fullName</code>, <code>email</code>,
+ * <code>phone</code> (optional) und <code>password</code>. Führt einfache
+ * Client-Validierungen durch (z. B. Mindestlängen, E-Mail-/Telefon-Format) und
+ * sendet die Daten an <code>POST /auth/register</code> mit <code>credentials: "include"</code>
+ * (JWT-Cookie vom Backend).</p>
+ *
+ * <ul>
+ *   <li>Zeigt Serverfehler strukturiert an (ProblemDetail, 409/400 usw.).</li>
+ *   <li>Speichert das Ergebnis in <code>localStorage</code> (Schlüssel <code>authUser</code>).</li>
+ *   <li>Leitet bei Erfolg automatisch zu <code>/myaccount</code> weiter.</li>
+ * </ul>
+ *
+ * @component
+ * @returns {JSX.Element}
+ */
 function Register() {
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
@@ -24,7 +42,6 @@ function Register() {
         setErrorMsg("");
         setSuccessMsg("");
 
-        // proste sprawdzenia po stronie klienta
         if (fullName.trim().length < 2)
             return setErrorMsg("Bitte den vollständigen Namen angeben.");
         if (!validEmail(email))
@@ -40,7 +57,6 @@ function Register() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
-                // backend nie potrzebuje już username — wysyłamy tylko to:
                 body: JSON.stringify({
                     email,
                     password,
@@ -53,7 +69,6 @@ function Register() {
                 let msg = "";
                 try {
                     const text = await res.text();
-                    console.log("Server returned:", text);
                     if (text) {
                         const j = JSON.parse(text);
                         const fieldMsg =
@@ -62,9 +77,7 @@ function Register() {
                                 : "";
                         msg = fieldMsg || j.detail || j.title || j.message || "";
                     }
-                } catch (err) {
-                    console.error("JSON parse error:", err);
-                }
+                } catch {}
 
                 if (!msg) {
                     switch (res.status) {
@@ -79,14 +92,12 @@ function Register() {
                     }
                 }
 
-                setErrorMsg(msg);   // <-- pokaż użytkownikowi
-                return;             // <-- zakończ funkcję (nie rób throw)
+                setErrorMsg(msg);
+                return;
             }
 
-            // sukces → czytamy JSON RAZ
             const data = await res.json();
 
-            // username w całej app = email (żeby MyAccount i inne działały spójnie)
             localStorage.setItem(
                 "authUser",
                 JSON.stringify({

@@ -3,9 +3,28 @@ import { render, screen, fireEvent, waitFor, within } from "@testing-library/rea
 import { BrowserRouter } from "react-router-dom";
 import ReservationForm from "../components/ReservationForm";
 
-const renderWithRouter = (ui) => render(<BrowserRouter>{ui}</BrowserRouter>);
 
-// helper: jutro YYYY-MM-DD
+/**
+ * Integrationstest für das Reservierungsformular (Fehlerpfad).
+ *
+ * <p>Prüft, dass die Komponente bei einer fehlgeschlagenen Reservierung
+ * (HTTP 400) eine aussagekräftige Fehlermeldung rendert.</p>
+ *
+ * <ul>
+ *   <li>Mockt <code>GET /api/reservations/available</code> (verfügbare Tische).</li>
+ *   <li>Mockt <code>POST /api/reservations</code> mit Status 400 und Klartext-Fehler.</li>
+ *   <li>Füllt Datum, Uhrzeit, Dauer und Tisch aus und sendet das Formular ab.</li>
+ *   <li>Erwartet die Meldung: „Reservierung fehlgeschlagen: Kapazität überschritten“.</li>
+ * </ul>
+ *
+ * @remarks
+ * Die Uhrzeit-Selects werden über den Container nach dem Label „Uhrzeit“
+ * mittels <code>within(...).getAllByRole('combobox')</code> selektiert.
+ *
+ * @returns {void}
+ */
+
+const renderWithRouter = (ui) => render(<BrowserRouter>{ui}</BrowserRouter>);
 const pad = (n) => (n < 10 ? "0" + n : "" + n);
 const tomorrowDateStr = () => {
     const d = new Date(Date.now() + 24 * 60 * 60 * 1000);
@@ -27,7 +46,6 @@ test("zeigt error wenn die Reservierung nicht akzeptiert wird", async () => {
         }
 
         if (method === "POST" && /\/api\/reservations$/.test(url)) {
-            // 400 — komponent wyrenderuje: "Reservierung fehlgeschlagen: Kapazität überschritten"
             return Promise.resolve({
                 ok: false,
                 status: 400,
@@ -47,14 +65,14 @@ test("zeigt error wenn die Reservierung nicht akzeptiert wird", async () => {
     const setReservation = jest.fn();
     renderWithRouter(<ReservationForm setReservation={setReservation} />);
 
-    // data
+
     fireEvent.change(screen.getByLabelText(/Datum/i), {
         target: { value: tomorrowDateStr() },
     });
 
-    // ⬇️ "Uhrzeit" nie ma htmlFor; wybierz dwa selecty z kontenera tuż po labelu
+
     const timeLabel = screen.getByText(/Uhrzeit/i);
-    const timeRow = timeLabel.nextElementSibling; // <div class="time-row">...</div>
+    const timeRow = timeLabel.nextElementSibling;
     const [hourSelect, minuteSelect] = within(timeRow).getAllByRole("combobox");
     fireEvent.change(hourSelect, { target: { value: "18" } });
     fireEvent.change(minuteSelect, { target: { value: "00" } });
@@ -62,7 +80,7 @@ test("zeigt error wenn die Reservierung nicht akzeptiert wird", async () => {
     // Dauer
     fireEvent.change(screen.getByLabelText(/Dauer/i), { target: { value: "120" } });
 
-    // poczekaj aż załadują się stoły i wybierz Tisch 3
+
     const tableSelect = screen.getByLabelText(/Tisch/i);
     await waitFor(() =>
         expect(within(tableSelect).getByRole("option", { name: /Tisch\s*3/i })).toBeInTheDocument()
@@ -72,7 +90,7 @@ test("zeigt error wenn die Reservierung nicht akzeptiert wird", async () => {
     // submit
     fireEvent.click(screen.getByRole("button", { name: /Reservieren/i }));
 
-    // oczekiwany błąd
+
     await waitFor(() => {
         expect(
             screen.getByText(/Reservierung fehlgeschlagen:\s*Kapazität überschritten/i)

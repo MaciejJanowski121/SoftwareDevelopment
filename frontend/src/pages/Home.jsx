@@ -1,6 +1,16 @@
 import '../styles/home.css';
 import '../styles/global.css';
 
+/**
+ * Startseite der Anwendung.
+ *
+ * <p>Zeigt Begrüßung, Highlights und Restaurantinformationen
+ * in einem zweispaltigen Layout.</p>
+ *
+ * @component
+ * @returns {JSX.Element} Startseite.
+ */
+
 function Home() {
     return (
         <main

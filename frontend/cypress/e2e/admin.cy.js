@@ -1,5 +1,23 @@
-// cypress/e2e/admin.cy.js
 
+/**
+ * End-to-End-Test für den Adminbereich.
+ *
+ * <p>Dieser Cypress-Test überprüft die Zugriffskontrolle auf die Admin-Seite
+ * anhand der Benutzerrolle, die vom Endpunkt <code>/auth/auth_check</code> geliefert wird.</p>
+ *
+ * <ul>
+ *   <li><strong>Rolle ROLE_USER:</strong> Der Zugriff auf <code>/admin</code> führt
+ *       automatisch zu einer Weiterleitung auf <code>/myaccount</code>.</li>
+ *   <li><strong>Rolle ROLE_ADMIN:</strong> Der Zugriff bleibt erlaubt, und die
+ *       Admin-Oberfläche wird korrekt angezeigt (Überschrift, Buttons oder Container sichtbar).</li>
+ *   <li>Mockt alle Netzwerkanfragen (<code>cy.intercept</code>), um das Backend zu simulieren
+ *       und deterministische Testergebnisse zu gewährleisten.</li>
+ * </ul>
+ *
+ * @test
+ * @framework Cypress
+ * @returns {void} Führt zwei vollständige Browsertests zur Rollenvalidierung aus.
+ */
 describe('Admin Panel Zugriff', () => {
     beforeEach(() => {
         cy.clearCookies();
@@ -35,8 +53,6 @@ describe('Admin Panel Zugriff', () => {
             },
         }).as('authAdmin');
 
-        // (opcjonalnie) jeżeli panel jednak pobiera listę — zostawiamy stub,
-        // ale NIE czekamy na niego (apka może go nie wywoływać na wejściu)
         cy.intercept('GET', '**/api/reservations/all', {
             statusCode: 200,
             headers: { 'content-type': 'application/json' },
@@ -46,22 +62,9 @@ describe('Admin Panel Zugriff', () => {
         cy.visit('http://localhost:3000/admin');
         cy.wait('@authAdmin');
 
-        // 1) URL faktycznie na /admin
         cy.location('pathname').should('eq', '/admin');
 
-        // 2) UI admina jest widoczne — wybierz JEDEN z poniższych selektorów,
-        // w zależności co masz w widoku admina:
-
-        // a) jeśli masz nagłówek:
         cy.findByRole('heading', { name: /admin|verwaltung|reservierungen/i })
             .should('be.visible');
-
-        // b) jeśli masz wrapper z data-cy:
-        // cy.get('[data-cy="admin-panel"]').should('be.visible');
-
-        // c) jeśli masz przycisk/akcję admina:
-        // cy.findByRole('button', { name: /neue tisch|export|refresh|laden/i }).should('be.visible');
-
-        // NIE czekamy na @reservationsAll, bo request może nie wystąpić
     });
 });

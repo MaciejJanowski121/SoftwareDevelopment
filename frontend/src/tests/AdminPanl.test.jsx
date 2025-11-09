@@ -11,6 +11,27 @@ jest.mock("react-router-dom", () => {
     };
 });
 
+/**
+ * Integrationstest für die Admin-Panel-Seite.
+ *
+ * <p>Dieser Test überprüft das Verhalten der Komponente
+ * <code>AdminPanel.jsx</code> in Abhängigkeit von der Benutzerrolle.</p>
+ *
+ * <ul>
+ *   <li>Mockt die React-Router-Funktion <code>useNavigate</code>, um Weiterleitungen zu prüfen.</li>
+ *   <li>Verwendet <code>MemoryRouter</code>, um die Navigation in einer isolierten Testumgebung zu simulieren.</li>
+ *   <li>Prüft drei Hauptszenarien:
+ *     <ul>
+ *       <li>Darstellung der Admin-Inhalte für <code>ROLE_ADMIN</code>,</li>
+ *       <li>Weiterleitung nach <code>/myaccount</code> für normale Benutzer,</li>
+ *       <li>Weiterleitung, wenn keine Rolle gesetzt ist.</li>
+ *     </ul>
+ *   </li>
+ * </ul>
+ *
+ * @component
+ * @returns {void} Führt automatisierte Tests mit React Testing Library aus.
+ */
 describe("AdminPanel", () => {
     const mockNavigate = jest.fn();
 

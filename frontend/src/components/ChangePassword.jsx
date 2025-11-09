@@ -1,46 +1,83 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import '../styles/changepassword.css';
+import "../styles/changepassword.css";
 
+/**
+ * Komponente zum Ändern des Benutzerpassworts.
+ *
+ * <p>Diese React-Komponente bietet ein Formular zur Änderung des Passworts
+ * des aktuell eingeloggten Benutzers. Sie sendet eine Anfrage an den
+ * Spring-Boot-Endpunkt <code>/user/change-password</code> und verwendet dabei
+ * das JWT-Cookie für die Authentifizierung.</p>
+ *
+ * <ul>
+ *   <li>Validiert Eingaben lokal (z. B. Mindestlänge des neuen Passworts).</li>
+ *   <li>Zeigt Fehlermeldungen direkt im Formular an (ProblemDetail-Unterstützung).</li>
+ *   <li>Leitet nach erfolgreicher Änderung zur Konto-Seite weiter.</li>
+ * </ul>
+ *
+ * @component
+ * @returns {JSX.Element} Password-Change-Formular.
+ */
 function ChangePassword() {
     const navigate = useNavigate();
 
-    // Zustände für das alte und neue Passwort
+    /** Zustand: altes Passwort */
     const [oldPassword, setOldPassword] = useState("");
+    /** Zustand: neues Passwort */
     const [newPassword, setNewPassword] = useState("");
+    /** Zustand: Fehlermeldung */
+    const [error, setError] = useState("");
+    /** Zustand: Loading-Indikator */
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Funktion zum Absenden des Passwortänderungsformulars
+    /**
+     * Sendet die Passwortänderung an das Backend.
+     *
+     * @async
+     * @param {Event} e Submit-Event des Formulars
+     */
     const handlePasswordChange = async (e) => {
         e.preventDefault();
+        setError("");
+        setIsLoading(true);
 
         try {
-            // Anfrage an das Backend zur Passwortänderung
             const response = await fetch("http://localhost:8080/user/change-password", {
                 method: "PUT",
-                credentials: "include", // Cookie (JWT) wird mitgesendet
+                credentials: "include",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    oldPassword: oldPassword,
-                    newPassword: newPassword
-                })
+                body: JSON.stringify({ oldPassword, newPassword }),
             });
 
             if (response.ok) {
-                console.log("Passwort wurde geändert");
-                // Nach erfolgreicher Änderung zur Benutzerseite navigieren
                 navigate("/myaccount");
-            } else {
-                console.log("Passwort wurde nicht geändert – ein Fehler ist aufgetreten");
+                return;
             }
-        } catch (error) {
-            console.error("Fehler beim Ändern des Passworts:", error);
+
+            let message = "Ein Fehler ist aufgetreten.";
+            const ct = response.headers.get("content-type") || "";
+            if (ct.includes("application/problem+json") || ct.includes("application/json")) {
+                try {
+                    const problem = await response.json();
+                    message = problem?.detail || problem?.title || message;
+                } catch {
+                    message = await response.text().catch(() => message);
+                }
+            } else {
+                message = await response.text().catch(() => message);
+            }
+            setError(message);
+        } catch {
+            setError("Netzwerk- oder Serverfehler.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
         <div className="password-change-container">
-            <form className="password-change-form" onSubmit={handlePasswordChange}>
-                {/* Zurück-Button zur vorherigen Seite */}
+            <form className="password-change-form" onSubmit={handlePasswordChange} noValidate>
                 <button
                     type="button"
                     onClick={() => navigate("/myaccount")}
@@ -49,26 +86,38 @@ function ChangePassword() {
                     ← Zurück
                 </button>
 
-                <h1>Passwort Ändern</h1>
+                <h1>Change Password</h1>
 
-                {/* Eingabefeld für das alte Passwort */}
+                <label htmlFor="oldPassword">Old Password</label>
                 <input
+                    id="oldPassword"
                     type="password"
-                    placeholder="Altes Passwort"
+                    placeholder="Enter old password"
+                    autoComplete="current-password"
                     onChange={(e) => setOldPassword(e.target.value)}
                     required
                 />
 
-                {/* Eingabefeld für das neue Passwort */}
+                <label htmlFor="newPassword">New Password</label>
                 <input
+                    id="newPassword"
                     type="password"
-                    placeholder="Neues Passwort"
+                    placeholder="Enter new password"
+                    autoComplete="new-password"
                     onChange={(e) => setNewPassword(e.target.value)}
                     required
+                    minLength={6}
                 />
 
-                {/* Absenden des Formulars */}
-                <button type="submit" className="password-change">Passwort Ändern</button>
+                {error && (
+                    <p className="error-message" aria-live="assertive">
+                        {error}
+                    </p>
+                )}
+
+                <button type="submit" className="password-change" disabled={isLoading}>
+                    {isLoading ? "Processing..." : "Change Password"}
+                </button>
             </form>
         </div>
     );

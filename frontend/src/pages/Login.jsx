@@ -2,6 +2,23 @@ import "../styles/loginAndRegister.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useMemo } from "react";
 
+/**
+ * Login-Seite für bestehende Benutzer.
+ *
+ * <p>Sendet E-Mail und Passwort an <code>/auth/login</code> (mit
+ * <code>credentials: "include"</code> für JWT-Cookies). Bei Erfolg werden die
+ * Benutzerdaten im <code>localStorage</code> zwischengespeichert und anhand
+ * der Rolle auf <code>/admin</code> bzw. <code>/myaccount</code> navigiert.</p>
+ *
+ * <ul>
+ *   <li>Zeigt validierte Fehlermeldungen aus RFC7807-Antworten (ProblemDetail) an.</li>
+ *   <li>Unterstützt Passwortanzeige ein-/ausblenden.</li>
+ *   <li>Deaktiviert den Submit-Button während des Sendens.</li>
+ * </ul>
+ *
+ * @component
+ * @returns {JSX.Element}
+ */
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -12,6 +29,16 @@ function Login() {
     const navigate = useNavigate();
     const API = useMemo(() => process.env.REACT_APP_API_URL || "http://localhost:8080", []);
 
+    /**
+     * Reicht die Login-Daten an das Backend weiter und verarbeitet die Antwort.
+     *
+     * <p>Bei Fehlern werden – falls vorhanden – Feld-/Detailmeldungen aus einer
+     * <code>application/problem+json</code>-Antwort gezeigt. Andernfalls greift
+     * ein passender Fallback-Text basierend auf dem HTTP-Status.</p>
+     *
+     * @param {React.FormEvent<HTMLFormElement>} e - Submit-Event
+     * @returns {Promise<void>}
+     */
     async function handleSubmit(e) {
         e.preventDefault();
         setErrorMsg("");
@@ -31,19 +58,14 @@ function Login() {
                     const isJson = ct.includes("application/json") || ct.includes("application/problem+json");
                     if (isJson) {
                         const j = await res.json();
-                        // 1) priorytet: komunikat walidacyjny z pól (np. email)
                         const fieldMsg =
                             j?.fields && typeof j.fields === "object"
-                                ? // weź najpierw email, a jak nie ma – pierwszy komunikat z mapy
-                                (j.fields.email ??
-                                    Object.values(j.fields)[0])
+                                ? (j.fields.email ?? Object.values(j.fields)[0])
                                 : "";
-
-                        // 2) standardowe pola RFC7807
                         msg = fieldMsg || j?.detail || j?.title || j?.message || "";
                     }
                 } catch {
-                    // ignorujemy – przejdziemy do fallbacków
+                    /* ignore parse issues, fall back below */
                 }
 
                 if (!msg) {
@@ -69,14 +91,13 @@ function Login() {
                 throw new Error(msg);
             }
 
-            // OK
             const data = await res.json();
             const username = data.username || data.email;
 
             localStorage.setItem(
                 "authUser",
                 JSON.stringify({
-                    username,            // alias na email
+                    username,
                     role: data.role,
                     fullName: data.fullName,
                     email: data.email,

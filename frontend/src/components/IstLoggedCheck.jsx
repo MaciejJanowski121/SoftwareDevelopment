@@ -1,50 +1,69 @@
 import { useEffect, useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
-// Komponente zur Prüfung, ob der Benutzer bereits eingeloggt ist
-// Wenn ja, erfolgt eine Weiterleitung zur /myaccount-Seite
-// Wenn nicht, wird das übergebene Kind-Element (z. B. Login-Formular) gerendert
+/** Basis-URL des Backends (kann über ENV-Variable gesetzt werden). */
+const API = "http://localhost:8080";
 
-export default function IstLoggedCheck({ children }) {
-    const [isLogged, setIsLogged] = useState(false); // Status: eingeloggt oder nicht
-    const [isLoading, setIsLoading] = useState(true); // Wird geprüft?
+/**
+ * Wrapper-Komponente zur Prüfung, ob der Benutzer bereits eingeloggt ist.
+ *
+ * <p>Verhindert den Zugriff auf Seiten wie Login/Register, wenn bereits eine
+ * gültige Session besteht, und leitet in diesem Fall nach <code>/myaccount</code>
+ * weiter. Andernfalls werden die übergebenen Kinder gerendert.</p>
+ *
+ * <ul>
+ *   <li>Fragt <code>/auth/auth_check</code> mit <code>credentials: "include"</code> ab.</li>
+ *   <li>Zeigt während der Prüfung eine Ladeanzeige.</li>
+ *   <li>Verwendet einen <em>AbortController</em>, um Race Conditions zu vermeiden.</li>
+ * </ul>
+ *
+ * @component
+ * @param {{ children: JSX.Element }} props
+ * @returns {JSX.Element}
+ */
+export default function IsLoggedCheck({ children }) {
+    /** Zustand: ob der Benutzer bereits eingeloggt ist. */
+    const [isLogged, setIsLogged] = useState(false);
+    /** Zustand: ob gerade die Prüfung läuft. */
+    const [isLoading, setIsLoading] = useState(true);
 
-    const navigate = useNavigate();
+    /**
+     * Asynchrone Prüfung der Benutzer-Authentifizierung.
+     *
+     * <p>Ruft den Endpunkt <code>/auth/auth_check</code> auf und setzt
+     * den lokalen Zustand abhängig vom Ergebnis.</p>
+     *
+     * @param {AbortSignal} signal
+     * @returns {Promise<void>}
+     */
+    const checkAuth = async (signal) => {
+        try {
+            const res = await fetch(`${API}/auth/auth_check`, {
+                method: "GET",
+                credentials: "include",
+                signal,
+            });
+            setIsLogged(res.ok);
+        } catch {
+            setIsLogged(false);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                // Anfrage zur Authentifizierungsprüfung
-                const res = await fetch("http://localhost:8080/auth/auth_check", {
-                    method: "GET",
-                    credentials: "include", // JWT-Cookie wird mitgeschickt
-                });
-
-                if (res.ok) {
-                    setIsLogged(true); // Benutzer ist eingeloggt
-                } else {
-                    setIsLogged(false); // Benutzer ist nicht eingeloggt
-                }
-            } catch (error) {
-                setIsLogged(false); // Bei Fehler: als nicht eingeloggt behandeln
-            } finally {
-                setIsLoading(false); // Prüfung abgeschlossen
-            }
-        };
-
-        checkAuth();
+        const ctrl = new AbortController();
+        checkAuth(ctrl.signal);
+        return () => ctrl.abort();
     }, []);
 
-    // Solange geprüft wird: Ladehinweis anzeigen
     if (isLoading) {
-        return <p>Anmeldung wird überprüft...</p>;
+        return <p aria-live="polite">Überprüfung der Anmeldung…</p>;
     }
 
-    // Wenn eingeloggt → weiterleiten zu /myaccount
     if (isLogged) {
-        return <Navigate to="/myaccount" />;
+        return <Navigate to="/myaccount" replace />;
     }
 
-    // Wenn nicht eingeloggt → ursprüngliche Komponente rendern
     return children;
 }

@@ -5,6 +5,23 @@ import { BrowserRouter } from "react-router-dom";
 global.fetch = jest.fn();
 const renderWithRouter = (ui) => render(<BrowserRouter>{ui}</BrowserRouter>);
 
+/**
+ * Integrationstest für die Registrierungsseite.
+ *
+ * <p>Dieser Test überprüft das Verhalten der Komponente
+ * <code>Register.jsx</code> während des vollständigen Registrierungsablaufs.</p>
+ *
+ * <ul>
+ *   <li>Mockt die <code>fetch</code>-API, um eine erfolgreiche Serverantwort zu simulieren.</li>
+ *   <li>Füllt das Formular mit Testdaten aus und sendet es ab.</li>
+ *   <li>Überprüft, dass die Anfrage korrekt an <code>/auth/register</code> gesendet wird
+ *       und eine Erfolgsnachricht mit <code>role="status"</code> angezeigt wird.</li>
+ *   <li>Validiert die Integration von Frontend-Formularlogik und Backend-Kommunikation.</li>
+ * </ul>
+ *
+ * @component
+ * @returns {void} Führt automatisierten Integrationstest mit React Testing Library aus.
+ */
 describe("Register", () => {
     beforeEach(() => fetch.mockClear());
 
@@ -29,7 +46,6 @@ describe("Register", () => {
         fireEvent.change(screen.getByLabelText(/Telefon/i), {
             target: { value: "+491701234567" },
         });
-        // brak „Benutzername” w UI – pomijamy
         fireEvent.change(screen.getByLabelText(/^Passwort$/i), {
             target: { value: "secret1" },
         });
@@ -42,10 +58,11 @@ describe("Register", () => {
                 expect.objectContaining({
                     method: "POST",
                     credentials: "include",
-                    headers: expect.objectContaining({ "Content-Type": "application/json" }),
+                    headers: expect.objectContaining({
+                        "Content-Type": "application/json",
+                    }),
                 })
             );
-            // oczekuj komunikatu sukcesu (role="status")
             expect(screen.getByRole("status")).toHaveTextContent(/Registrierung erfolgreich/i);
         });
     });

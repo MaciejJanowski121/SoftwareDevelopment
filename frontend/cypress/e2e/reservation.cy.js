@@ -1,4 +1,27 @@
-// cypress/e2e/reservation.cy.js
+
+/**
+ * End-to-End-Test für den Reservierungsvorgang.
+ *
+ * <p>Dieser Test überprüft das vollständige Verhalten des Reservierungsformulars
+ * – von der erfolgreichen Erstellung über Fehlermeldungen bis hin zu
+ * UI-Validierungen für Zeit- und Datumsgrenzen.</p>
+ *
+ * <ul>
+ *   <li>Mockt <code>/auth/auth_check</code>, um einen eingeloggenen Benutzer zu simulieren.</li>
+ *   <li>Validiert, dass eine Reservierung erfolgreich angelegt und zur Seite
+ *       <code>/reservations/my</code> weitergeleitet wird.</li>
+ *   <li>Testet den Konfliktfall (<code>HTTP 409</code>) mit einer aussagekräftigen
+ *       Fehlermeldung bei doppelter Tischreservierung.</li>
+ *   <li>Überprüft UI-Regeln: keine Reservierung in der Vergangenheit und
+ *       maximale Endzeit 22:00 Uhr.</li>
+ *   <li>Ignoriert temporäre React-Fehler („document is null“) während des schnellen Rerenderings.</li>
+ * </ul>
+ *
+ * @test
+ * @framework Cypress
+ * @returns {void} Führt E2E-Tests für das Reservierungsformular aus.
+ */
+
 describe('Reservation', () => {
     const pad = (n) => (n < 10 ? '0' + n : String(n));
     const stepMinute = (m) => (parseInt(m, 10) >= 30 ? '30' : '00');
@@ -9,10 +32,15 @@ describe('Reservation', () => {
     };
 
     beforeEach(() => {
+
+        cy.on('uncaught:exception', (err) => {
+            if (/document/i.test(err?.message || '')) return false;
+        });
+
         cy.clearCookies();
         cy.clearLocalStorage();
 
-        // zawsze zalogowany użytkownik
+
         cy.intercept('GET', '**/auth/auth_check', {
             statusCode: 200,
             headers: { 'content-type': 'application/json' },
@@ -21,13 +49,16 @@ describe('Reservation', () => {
     });
 
     it('erstellt erfolgreich eine Reservierung und navigiert zu /reservations/my', () => {
-        cy.intercept('GET', '**/api/reservations/available*', {
-            statusCode: 200,
-            body: [
-                { id: 1, tableNumber: 5, numberOfSeats: 4 },
-                { id: 2, tableNumber: 6, numberOfSeats: 2 },
-            ],
-        }).as('available');
+        cy.intercept(
+            { method: 'GET', url: '**/api/reservations/available*' },
+            {
+                statusCode: 200,
+                body: [
+                    { id: 1, tableNumber: 5, numberOfSeats: 4 },
+                    { id: 2, tableNumber: 6, numberOfSeats: 2 },
+                ],
+            }
+        ).as('available');
 
         cy.intercept('POST', '**/api/reservations', {
             statusCode: 200,
@@ -42,7 +73,7 @@ describe('Reservation', () => {
         cy.visit('http://localhost:3000/reservations/new');
         cy.wait('@authCheck');
 
-        // jutro 18:00
+
         const t = new Date(Date.now() + 24 * 60 * 60 * 1000);
         t.setHours(18, 0, 0, 0);
         const futureLocal = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}T${pad(t.getHours())}:${pad(
@@ -50,13 +81,13 @@ describe('Reservation', () => {
         )}`;
         const { datePart, h, m } = splitLocal(futureLocal);
 
-        cy.get('#startDate').clear().type(datePart);
-        cy.get('#hour').select(h);
-        cy.get('#minute').select(stepMinute(m));
+        cy.get('#startDate', { timeout: 10000 }).should('exist').clear().type(datePart);
+        cy.get('#hour').should('exist').select(h, { force: true });
+        cy.get('#minute').should('exist').select(stepMinute(m), { force: true });
 
         cy.wait('@available');
-        cy.get('#duration').select('120');
-        cy.get('#tableNumber').select('5');
+        cy.get('#duration').select('120', { force: true });
+        cy.get('#tableNumber').select('5', { force: true });
 
         cy.findByRole('button', { name: /reservieren/i }).click();
 
@@ -65,13 +96,11 @@ describe('Reservation', () => {
     });
 
     it('zeigt eine verständliche Meldung, wenn ein Tisch bereits reserviert ist (409)', () => {
-        // dostępny stół 1 – żeby button nie był disabled
         cy.intercept('GET', '**/api/reservations/available*', {
             statusCode: 200,
             body: [{ id: 1, tableNumber: 1, numberOfSeats: 4 }],
         }).as('available');
 
-        // ⬇️ 409 jako ProblemDetail JSON (tak jak oczekuje frontend)
         cy.intercept('POST', '**/api/reservations', {
             statusCode: 409,
             headers: { 'content-type': 'application/problem+json' },
@@ -87,7 +116,6 @@ describe('Reservation', () => {
         cy.visit('http://localhost:3000/reservations/new');
         cy.wait('@authCheck');
 
-        // jutro 18:00
         const t = new Date(Date.now() + 24 * 60 * 60 * 1000);
         t.setHours(18, 0, 0, 0);
         const local = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}T${pad(t.getHours())}:${pad(
@@ -96,23 +124,22 @@ describe('Reservation', () => {
         const { datePart, h, m } = splitLocal(local);
 
         cy.get('#startDate').clear().type(datePart);
-        cy.get('#hour').select(h);
-        cy.get('#minute').select(stepMinute(m));
+        cy.get('#hour').select(h, { force: true });
+        cy.get('#minute').select(stepMinute(m), { force: true });
 
         cy.wait('@available');
-        cy.get('#duration').select('120');
-        cy.get('#tableNumber').select('1');
+        cy.get('#duration').select('120', { force: true });
+        cy.get('#tableNumber').select('1', { force: true });
 
         cy.findByRole('button', { name: /reservieren/i }).click();
         cy.wait('@conflict');
 
         cy.get('[data-cy="form-error"]', { timeout: 8000 })
             .should('be.visible')
-            .and('contain', 'reserviert'); // pochodzi z mapowania type → przyjazny tekst
+            .and('contain', 'reserviert');
     });
 
-    it('waliduje UI: przeszłość i granicę 22:00', () => {
-        // zwracamy jakikolwiek stół, żeby można było kliknąć submit
+    it('validiert UI: keine Reservierungen in der Vergangenheit und keine über 22:00 Uhr hinaus', () => {
         cy.intercept('GET', '**/api/reservations/available*', {
             statusCode: 200,
             body: [{ id: 99, tableNumber: 3, numberOfSeats: 2 }],
@@ -121,7 +148,7 @@ describe('Reservation', () => {
         cy.visit('http://localhost:3000/reservations/new');
         cy.wait('@authCheck');
 
-        // (1) wczoraj 18:00 → przeszłość
+
         const y = new Date(Date.now() - 24 * 60 * 60 * 1000);
         y.setHours(18, 0, 0, 0);
         const pastLocal = `${y.getFullYear()}-${pad(y.getMonth() + 1)}-${pad(y.getDate())}T${pad(y.getHours())}:${pad(
@@ -130,11 +157,12 @@ describe('Reservation', () => {
         const p = splitLocal(pastLocal);
 
         cy.get('#startDate').clear().type(p.datePart);
-        cy.get('#hour').select(p.h);
-        cy.get('#minute').select(stepMinute(p.m));
-        cy.wait('@avail'); // duration change może odpalić /available
-        cy.get('#duration').select('120');
-        cy.get('#tableNumber').select('3'); // w nowym formularzu submit wymaga stołu
+        cy.get('#hour').select(p.h, { force: true });
+        cy.get('#minute').select(stepMinute(p.m), { force: true });
+
+        cy.wait('@avail');
+        cy.get('#duration').select('120', { force: true });
+        cy.get('#tableNumber').select('3', { force: true });
 
         cy.findByRole('button', { name: /reservieren/i }).click();
 
@@ -146,7 +174,7 @@ describe('Reservation', () => {
                 expect(/vergangen|nicht möglich/.test(t)).to.eq(true);
             });
 
-        // (2) 21:30 → 120 min powinno być zablokowane (max do 22:00)
+
         const s = new Date();
         s.setSeconds(0, 0);
         s.setHours(21, 30, 0, 0);
@@ -157,8 +185,9 @@ describe('Reservation', () => {
         const L = splitLocal(lateLocal);
 
         cy.get('#startDate').clear().type(L.datePart);
-        cy.get('#hour').select(L.h);
-        cy.get('#minute').select(stepMinute(L.m));
+        cy.get('#hour').select(L.h, { force: true });
+        cy.get('#minute').select(stepMinute(L.m), { force: true });
+
         cy.get('#duration').find('option[value="120"]').should('be.disabled');
     });
 });

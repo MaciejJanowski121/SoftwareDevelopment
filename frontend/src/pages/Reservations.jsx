@@ -2,17 +2,39 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import "../styles/reservations.css";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Seite „Meine Reservierung“ für eingeloggte Nutzer.
+ *
+ * <p>Lädt die aktuelle Benutzer-Reservierung von
+ * <code>GET /api/reservations/userReservations</code> (JWT-Cookie) und zeigt
+ * sie in einer Karte an. Unterstützt manuelles Aktualisieren sowie Löschen
+ * über <code>DELETE /api/reservations/{id}</code>.</p>
+ *
+ * <ul>
+ *   <li>Rückfall auf leeren Zustand, wenn 204 (keine Reservierung).</li>
+ *   <li>Bei 401 kurzer Hinweis und Weiterleitung zum Login.</li>
+ *   <li>Fehler werden als Textmeldung oberhalb der Liste angezeigt.</li>
+ * </ul>
+ *
+ * @component
+ * @returns {JSX.Element}
+ */
 function Reservations() {
-    const [reservation, setReservation] = useState(null);   // 1 user -> 1 reservation
+    const [reservation, setReservation] = useState(null);
     const [loading, setLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState("");
     const navigate = useNavigate();
+
+    /** Basis-URL des Backends (ENV-Override möglich). */
     const API = useMemo(
         () => process.env.REACT_APP_API_URL || "http://localhost:8080",
         []
     );
 
-    // Lädt die aktuelle Benutzer-Reservierung (liefert ggf. 204 No Content)
+    /**
+     * Lädt die aktuelle Reservierung des angemeldeten Benutzers.
+     * @param {AbortSignal} [signal] optionales Abbruchsignal
+     */
     const loadReservation = useCallback(
         async (signal) => {
             setLoading(true);
@@ -26,7 +48,6 @@ function Reservations() {
 
                 const status = res.status;
 
-                // Nicht eingeloggt → Hinweis und Redirect
                 if (status === 401) {
                     setReservation(null);
                     setErrorMsg("Nie jesteś zalogowany.");
@@ -34,15 +55,12 @@ function Reservations() {
                     return;
                 }
 
-                // Keine Reservierung vorhanden
                 if (status === 204) {
                     setReservation(null);
                     return;
                 }
 
-                // Erfolgsfall
                 if (res.ok) {
-                    // Robust gegen falschen Content-Type
                     const raw = await res.text();
                     if (!raw) {
                         setReservation(null);
@@ -54,17 +72,14 @@ function Reservations() {
                     } catch {
                         throw new Error(raw || "Odpowiedź nie jest JSON-em.");
                     }
-                    // Erwartet flaches Objekt mit id, fullName, username, tableNumber, startTime, endTime
                     setReservation(data && data.id ? data : null);
                     return;
                 }
 
-                // Fehlerstatus
                 const raw = await res.text();
                 throw new Error(raw || `HTTP-Fehler: ${status}`);
             } catch (err) {
                 if (err.name !== "AbortError") {
-                    console.error("Fehler beim Laden:", err);
                     setErrorMsg(err.message || "Błąd podczas ładowania rezerwacji.");
                     setReservation(null);
                 }
@@ -81,7 +96,10 @@ function Reservations() {
         return () => ac.abort();
     }, [loadReservation]);
 
-    // Löscht die Reservierung des Benutzers
+    /**
+     * Löscht die Reservierung des Benutzers.
+     * @param {number} id Reservierungs-ID
+     */
     const deleteReservation = async (id) => {
         try {
             const res = await fetch(`${API}/api/reservations/${id}`, {
@@ -94,14 +112,15 @@ function Reservations() {
             }
             setReservation(null);
         } catch (err) {
-            console.error("Fehler beim Löschen:", err);
             setErrorMsg(err.message || "Błąd podczas usuwania rezerwacji.");
         }
     };
 
+    /** Formatiert ein ISO-Datum zu tt.mm.jjjj (de-DE). */
     const fmtDate = (iso) =>
         iso ? new Date(iso).toLocaleDateString("de-DE") : "Unbekannt";
 
+    /** Formatiert Start/Ende zu „HH:MM – HH:MM“. */
     const fmtTime = (startIso, endIso) => {
         if (!startIso || !endIso) return "Unbekannt";
         const start = new Date(startIso);
@@ -124,7 +143,7 @@ function Reservations() {
                     <h1>Deine Reservierung</h1>
 
                     <button
-                        onClick={() => loadReservation()}  // bewusst ohne AbortController beim manuellen Refresh
+                        onClick={() => loadReservation()}
                         className="reservations-refresh"
                         type="button"
                         disabled={loading}
