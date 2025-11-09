@@ -1,6 +1,24 @@
-/* ===== Reservations – bez :root, spójne z resztą ===== */
+/**
+ * ============================================================================
+ *  Stylesheet: Meine Reservierungen
+ *  ----------------------------------------------------------------------------
+ *  Gestaltet die Seite zur Anzeige/Verwaltung der eigenen Reservierung.
+ *  Optisch konsistent mit den übrigen Karten-Layouts (Glassmorphism, Gold-Akzente).
+ *
+ *  Abschnitte:
+ *    • Seitenlayout (.reservations-page) – zentrierter Inhalt
+ *    • Karte (.reservations-container) – Wrapper mit Schatten/Blur
+ *    • Kopfbereich (.reservations-header) – Titel & Zurück-Button
+ *    • Optionales Formular (.reservation-form ...) – Eingaben & Submit
+ *    • Liste (.reservation-list) – Einträge im Kartenstil
+ *    • Skelettladezustand (.skeleton-*) – Shimmer-Effekt
+ *    • Leerer Zustand (.empty-state) – Hinweis ohne Daten
+ *    • Responsivität – Rasteranpassungen für schmale Viewports
+ * ============================================================================
+ */
 
-/* Layout strony */
+
+/* Seitenlayout */
 .reservations-page {
     min-height: 70vh;
     display: grid;
@@ -8,38 +26,38 @@
     padding: clamp(16px, 4vw, 48px);
 }
 
-/* Karta kontenera */
+/* Kartencontainer */
 .reservations-container {
     width: min(900px, 96%);
-    background: rgba(255,250,245,0.88);          /* card */
-    border: 1px solid rgba(181,133,0,0.25);      /* gold-25 */
+    background: rgba(255,250,245,0.88);
+    border: 1px solid rgba(181,133,0,0.25);
     border-radius: 20px;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.12);    /* shadow */
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
     -webkit-backdrop-filter: blur(8px) saturate(1.05);
     backdrop-filter: blur(8px) saturate(1.05);
     padding: clamp(20px, 3vw, 28px);
-    color: #374151;                              /* text */
+    color: #374151;
 }
 
-/* Nagłówek z powrotem + tytuł */
+/* Kopfbereich: Zurück-Button + zentrierter Titel */
 .reservations-header {
-    position: relative;              /* 🔹 pozwala ustawić button absolutnie */
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;         /* 🔹 h1 wyśrodkowany */
+    justify-content: center;
     margin-bottom: 8px;
 }
 
 .reservations-header h1 {
     margin: 0;
-    color: #1e293b; /* ink */
+    color: #1e293b;
     font-size: clamp(1.4rem, 1.1vw + 1rem, 1.8rem);
     font-weight: 900;
     letter-spacing: -0.02em;
     text-align: center;
 }
 
-/* Back button – zawsze w lewym rogu */
+/* Zurück-Button (links ausgerichtet) */
 .reservations-back-button {
     position: absolute;
     left: 0;
@@ -48,9 +66,9 @@
     height: 36px;
     padding: 0 12px;
     border-radius: 10px;
-    border: 1px solid rgba(181,133,0,0.25);   /* gold-25 */
+    border: 1px solid rgba(181,133,0,0.25);
     background: #ffffff;
-    color: #1e293b;                           /* ink */
+    color: #1e293b;
     font-weight: 700;
     font-size: 1rem;
     cursor: pointer;
@@ -60,16 +78,18 @@
 }
 .reservations-back-button:hover {
     background: #fffaf0;
-    border-color: rgba(181,133,0,0.30);       /* gold-30 */
+    border-color: rgba(181,133,0,0.30);
 }
 .reservations-back-button:active {
     transform: translateY(-50%) translateY(1px);
 }
 
-/* Formularz (opcjonalny) */
+/* Optionales Formular-Wrapper */
 .reservation-form-wrapper {
     margin: 20px 0;
 }
+
+/* Formularfelder (Input/Select) */
 .reservation-form input,
 .reservation-form select {
     height: 44px;
@@ -89,7 +109,7 @@
     box-shadow: 0 0 0 3px rgba(181,133,0,0.25);
 }
 
-/* Złoty button tylko w formularzu */
+/* Formular-Submit (goldener Button) */
 .reservation-form button {
     height: 46px;
     border-radius: 12px;
@@ -102,14 +122,10 @@
     width: 100%;
     transition: filter .2s, transform .08s;
 }
-.reservation-form button:hover {
-    filter: brightness(1.03);
-}
-.reservation-form button:active {
-    transform: translateY(1px);
-}
+.reservation-form button:hover { filter: brightness(1.03); }
+.reservation-form button:active { transform: translateY(1px); }
 
-/* Lista rezerwacji */
+/* Liste der Reservierungen */
 .reservation-list {
     list-style: none;
     padding: 0;
@@ -118,13 +134,13 @@
     gap: 12px;
 }
 
-/* Karta pojedynczej rezerwacji */
+/* Einzelkarte (Reservierungseintrag) */
 .res-card {
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
     gap: 12px;
-    background: rgba(255,255,255,0.86);          /* tile */
+    background: rgba(255,255,255,0.86);
     border: 1px solid rgba(0,0,0,0.06);
     border-radius: 14px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.10);
@@ -140,7 +156,7 @@
 .reservation-info div { margin: 0; }
 .reservation-info strong { color: #1e293b; }
 
-/* Przycisk usuwania */
+/* Löschen-Button */
 .reservation-delete-btn {
     height: 36px;
     padding: 0 14px;
@@ -153,14 +169,10 @@
     cursor: pointer;
     transition: filter .2s, transform .08s;
 }
-.reservation-delete-btn:hover {
-    filter: brightness(1.05);
-}
-.reservation-delete-btn:active {
-    transform: translateY(1px);
-}
+.reservation-delete-btn:hover { filter: brightness(1.05); }
+.reservation-delete-btn:active { transform: translateY(1px); }
 
-/* Pusty stan */
+/* Leerer Zustand */
 .empty-state {
     margin: 12px 0 0;
     padding: 12px;
@@ -170,7 +182,7 @@
     color: #374151;
 }
 
-/* Skeleton (ładowanie) */
+/* Skelett-Loader (Shimmer) */
 .skeleton-list {
     display: grid;
     gap: 10px;
@@ -189,7 +201,7 @@
     100% { background-position: 200px 0; }
 }
 
-/* Responsywność */
+/* Responsivität */
 @media (max-width: 900px) {
     .reservation-info { grid-template-columns: 1fr; }
 }

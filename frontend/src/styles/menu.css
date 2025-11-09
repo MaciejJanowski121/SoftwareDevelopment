@@ -1,13 +1,38 @@
+/**
+ * ============================================================================
+ *  Stylesheet: Menü-Seite
+ *  ----------------------------------------------------------------------------
+ *  Gestaltung der Menüseite mit Kategorien, Tabellenansicht und Rück-Link.
+ *  Die Farbpalette basiert auf warmen Gold- und Brauntönen
+ *  (darkgoldenrod, burlywood, #ffcc00) für ein harmonisches Design.
+ *
+ *  Abschnitte:
+ *    • Layout (.menu-page) – Grundstruktur der Seite
+ *    • Überschrift (.menu-page h1) – Titelgestaltung
+ *    • Kategorie-Buttons (.category-buttons) – Filterelemente
+ *    • Tabelle (.menu-table) – Darstellung der Menüeinträge
+ *    • Rück-Link (.back-link) – Navigation zurück zur Startseite
+ *
+ *  Designmerkmale:
+ *    - Warme, kontrastreiche Farbpalette
+ *    - Klare Tabellenstruktur mit Hover-Effekt
+ *    - Responsive, einfache Struktur für Desktop & Tablet
+ * ============================================================================
+ */
 
+
+/* Layout der Menüseite */
 .menu-page {
     padding: 20px;
     text-align: center;
 }
 
+/* Überschrift */
 .menu-page h1 {
     color: darkgoldenrod;
 }
 
+/* Kategorie-Buttons (Filter für Menüarten) */
 .category-buttons {
     margin-bottom: 20px;
 }
@@ -31,13 +56,15 @@
     color: white;
 }
 
+/* Tabelle (Menüeinträge) */
 .menu-table {
     width: 80%;
     margin: 0 auto 20px;
     border-collapse: collapse;
 }
 
-.menu-table th, .menu-table td {
+.menu-table th,
+.menu-table td {
     padding: 12px 20px;
     border-bottom: 1px solid #ddd;
     text-align: left;
@@ -49,6 +76,7 @@
     background-color: burlywood;
 }
 
+/* Rück-Link (zur vorherigen Seite) */
 .back-link {
     display: inline-block;
     margin-top: 20px;

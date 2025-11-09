@@ -1,18 +1,39 @@
+/**
+ * ============================================================================
+ *  Globales Stylesheet (App-Container)
+ *  ----------------------------------------------------------------------------
+ *  Definiert das grundlegende Layout und das Hintergrundverhalten
+ *  der gesamten React-Anwendung. Sorgt für einheitliche Größen,
+ *  Schriftarten und Hintergrunddarstellung auf allen Seiten.
+ *
+ *  Abschnitte:
+ *    • Globaler Reset: Basisregeln für html & body
+ *    • App-Container: Hintergrundbild und Layoutkonfiguration
+ *
+ *  Designmerkmale:
+ *    - Vollständige Höhe des Viewports (min-height: 100vh)
+ *    - Skalierendes Hintergrundbild ohne horizontales Scrollen
+ *    - Schlichte Standard-Schrift (Arial)
+ * ============================================================================
+ */
+
+/* ===== Globaler Reset ===== */
 html, body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
     box-sizing: border-box;
-    height: 100%;     /* wystarczy tu */
+    height: 100%;
     width: 100%;
-    overflow-x: hidden; /* blokada poziomego scrolla */
+    overflow-x: hidden; /* verhindert horizontales Scrollen */
 }
 
+/* ===== App-Container ===== */
 .app-container {
     background-image: url('main.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    min-height: 100vh;  /* to zostaw */
-    width: 100%;        /* dodaj, żeby nie brał 100vw */
+    min-height: 100vh;  /* nutzt gesamte Fensterhöhe */
+    width: 100%;        /* sorgt für volle Breite */
 }

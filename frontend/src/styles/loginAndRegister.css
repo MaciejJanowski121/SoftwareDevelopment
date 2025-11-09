@@ -1,5 +1,31 @@
-/* ====== Auth – wspólny styl dla Login/Register ====== */
+/**
+ * ============================================================================
+ *  Stylesheet: Auth (Login & Register)
+ *  ----------------------------------------------------------------------------
+ *  Gemeinsame Styles für die Authentifizierungsseiten „Login“ und „Register“.
+ *  Einheitliche Karten-Optik (Glassmorphism), warme Gold-Akzente sowie
+ *  klare Typografie und Fokuszustände für barriereärmere Formulare.
+ *
+ *  Abschnitte:
+ *    • Layout (.auth-page) – zentrierte Seitenanordnung
+ *    • Karte (.auth-card) – Container mit Schatten/Blur
+ *    • Titel/Alert – Überschrift und Fehlermeldungen
+ *    • Formular (.auth-form, .field) – Labels, Inputs, Fokus-Styles
+ *    • Passwortfeld (.pwd-wrap, .pwd-toggle) – Anzeigen/Verbergen-Button
+ *    • Submit-Button (.auth-btn) – primäre Aktion mit Hover/Disabled-States
+ *    • Spinner (.spinner) – Ladeindikator im Button
+ *    • Meta-Link (.auth-meta, .auth-link) – Verweis Login/Registrierung
+ *    • Responsive – kleinere Optimierungen für schmale Viewports
+ *
+ *  Designmerkmale:
+ *    - Goldfarbene Primärakzente (#b58500 / #8a6500)
+ *    - Sanfte Übergänge und klare Fokusrahmen
+ *    - Konsistentes Erscheinungsbild über beide Auth-Seiten
+ * ============================================================================
+ */
 
+
+/* Layout (zentrale Ausrichtung der Seite) */
 .auth-page {
     min-height: 70vh;
     display: grid;
@@ -7,24 +33,26 @@
     padding: clamp(16px,4vw,48px);
 }
 
+/* Auth-Karte  */
 .auth-card {
     width: min(460px, 96%);
-    background: rgba(255,250,245,0.88); /* dawniej var(--card) */
+    background: rgba(255,250,245,0.88);
     border: 1px solid rgba(181,133,0,0.25);
     border-radius: 20px;
     box-shadow: 0 12px 32px rgba(0,0,0,0.12);
     -webkit-backdrop-filter: blur(8px) saturate(1.05);
     backdrop-filter: blur(8px) saturate(1.05);
     padding: clamp(18px,3vw,28px);
-    color: #374151; /* dawniej var(--text) */
+    color: #374151;
 }
 
+/* Titel und Fehlermeldungen */
 .auth-title {
     margin: 0 0 12px;
     font-size: clamp(1.6rem,1.2vw + 1.2rem,2rem);
     font-weight: 900;
     letter-spacing: -0.02em;
-    color: #1e293b; /* dawniej var(--ink) */
+    color: #1e293b;
 }
 
 .auth-alert {
@@ -37,6 +65,7 @@
     font-size: 0.95rem;
 }
 
+/* Formular (Labels, Inputs, Fokus) */
 .auth-form {
     display: grid;
     gap: 14px;
@@ -46,11 +75,13 @@
     display: grid;
     gap: 6px;
 }
+
 .field label {
     font-size: 0.95rem;
     font-weight: 600;
     color: #1e293b;
 }
+
 .field input {
     height: 44px;
     padding: 0 12px;
@@ -61,12 +92,13 @@
     outline: none;
     transition: box-shadow .2s, border-color .2s, background-color .2s;
 }
+
 .field input:focus {
     border-color: rgba(181,133,0,0.30);
     box-shadow: 0 0 0 3px rgba(181,133,0,0.25);
 }
 
-/* Hasło z przyciskiem „Anzeigen/Verbergen” */
+/* Passwortfeld (Anzeigen/Verbergen) */
 .pwd-wrap {
     position: relative;
     display: flex;
@@ -103,11 +135,12 @@
     background: #fffaf0;
     border-color: rgba(181,133,0,0.30);
 }
+
 .pwd-toggle:active {
     transform: translateY(1px);
 }
 
-/* Przycisk submit */
+/* Submit-Button (primäre Aktion) */
 .auth-btn {
     margin-top: 6px;
     height: 46px;
@@ -124,6 +157,7 @@
     gap: 10px;
     transition: filter .2s, transform .08s;
 }
+
 .auth-btn:hover { filter: brightness(1.03); }
 .auth-btn:active { transform: translateY(1px); }
 .auth-btn:disabled {
@@ -131,24 +165,29 @@
     cursor: not-allowed;
 }
 
-/* Spinner */
+/* Spinner (Ladeanimation im Button) */
 .spinner {
-    width: 16px; height: 16px;
+    width: 16px;
+    height: 16px;
     border: 2px solid rgba(255,255,255,.7);
     border-right-color: transparent;
     border-radius: 50%;
     display: inline-block;
     animation: spin .8s linear infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
 
-/* Meta + link */
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Meta-Link (Verweis zwischen Login/Registrierung) */
 .auth-meta {
     margin: 14px 0 0;
     font-size: .95rem;
     color: #374151;
     text-align: center;
 }
+
 .auth-link {
     color: #b58500;
     font-weight: 700;
@@ -156,9 +195,15 @@
     border-bottom: 2px solid transparent;
     transition: color .2s, border-color .2s;
 }
-.auth-link:hover { color: #8a6500; border-color: rgba(181,133,0,0.25); }
 
-/* Mobile */
-@media (max-width: 380px){
-    .pwd-wrap input{ padding-right: 96px; }
+.auth-link:hover {
+    color: #8a6500;
+    border-color: rgba(181,133,0,0.25);
+}
+
+/* Responsivität (Mobile Optimierung) */
+@media (max-width: 380px) {
+    .pwd-wrap input {
+        padding-right: 96px;
+    }
 }

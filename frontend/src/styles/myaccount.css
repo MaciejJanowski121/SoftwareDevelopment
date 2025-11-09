@@ -1,5 +1,27 @@
-/* ===== Account Page – spójny z Admin Panel ===== */
+/**
+ * ============================================================================
+ *  Stylesheet: Account-Seite
+ *  ----------------------------------------------------------------------------
+ *  Gestaltung der persönlichen Benutzerseite „Mein Konto“, die in Stil und
+ *  Layout mit dem Admin Panel übereinstimmt.
+ *
+ *  Abschnitte:
+ *    • Layout (.account-container, .account-box) – Grundstruktur und Karte
+ *    • Avatar (.account-avatar) – Benutzerinitialen im Kreis
+ *    • Überschriften (.account-box h1, .account-subtitle) – Titel und Untertitel
+ *    • Aktionen (.account-actions) – Schaltflächen-Layout
+ *    • Buttons (.account-btn) – Farbvarianten: Gold, Blau, Rot
+ *    • Responsivität – Anpassung für mobile Geräte
+ *
+ *  Designmerkmale:
+ *    - Einheitliches Glas-/Gold-Design (wie Admin Panel)
+ *    - Klare Typografie mit Fokus auf Benutzerfreundlichkeit
+ *    - Farbvarianten zur Unterscheidung der Aktionen
+ * ============================================================================
+ */
 
+
+/* Layout (zentrale Seite mit Karte) */
 .account-container {
     min-height: 80vh;
     display: flex;
@@ -15,12 +37,12 @@
     box-shadow: 0 12px 32px rgba(0,0,0,0.12);
     backdrop-filter: blur(8px) saturate(1.05);
     padding: 30px 30px;
-    width: 30%;                  /* 🔹 tak jak w Admin Panel */
+    width: 30%;
     color: #374151;
     text-align: center;
 }
 
-/* Avatar */
+/* Avatar (Benutzerinitialen im Kreis) */
 .account-avatar {
     width: 80px;
     height: 80px;
@@ -36,7 +58,7 @@
     box-shadow: 0 6px 12px rgba(0,0,0,0.2);
 }
 
-/* Nagłówki */
+/* Überschriften (Titel & Untertitel) */
 .account-box h1 {
     margin: 0 0 16px;
     color: #1e293b;
@@ -51,15 +73,14 @@
     margin-bottom: 20px;
 }
 
-/* Akcje */
+/* Aktionen (Button-Layout) */
 .account-actions {
     display: grid;
     gap: 12px;
     margin: 30px 0;
 }
 
-/* Przyciski */
-/* Przyciski – bazowy styl */
+/* Basis-Stil für Buttons */
 .account-btn {
     height: 56px;
     width: 65%;
@@ -75,15 +96,14 @@
     transition: filter .2s, transform .08s, background-color .2s, border-color .2s;
     text-decoration: none;
     color: #fff;
-
-    margin-left: auto;   /* 🔹 centrowanie */
-    margin-right: auto;  /* 🔹 centrowanie */
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .account-btn:hover { transform: translateY(-1px); }
 .account-btn:active { transform: translateY(0); }
 
-/* Złoty (dla "Neue Reservierung", "Meine Reservierungen") */
+/* Gold-Variante (z. B. „Neue Reservierung“, „Meine Reservierungen“) */
 .account-btn--gold {
     background: linear-gradient(180deg, #b58500, #8a6500);
     border-color: rgba(181,133,0,0.25);
@@ -91,7 +111,7 @@
 }
 .account-btn--gold:hover { filter: brightness(1.05); }
 
-/* Niebieski (dla "Passwort ändern") */
+/* Blaue Variante (z. B. „Passwort ändern“) */
 .account-btn--blue {
     background: linear-gradient(180deg, #007bff, #0056b3);
     border-color: rgba(0,123,255,0.25);
@@ -99,14 +119,15 @@
 }
 .account-btn--blue:hover { filter: brightness(1.05); }
 
-/* Czerwony (dla Logout) */
+/* Rote Variante (Logout) */
 .account-btn--danger {
     background: linear-gradient(180deg, #ef4444, #b91c1c);
     border-color: rgba(239,68,68,0.25);
     color: #fff;
 }
 .account-btn--danger:hover { filter: brightness(1.05); }
-/* Mobile */
+
+/* Responsives Verhalten (Mobile Ansicht) */
 @media (max-width: 768px) {
     .account-container { padding: 16px; }
     .account-box { width: 90%; }

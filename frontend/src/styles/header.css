@@ -1,29 +1,51 @@
-/* === NAVBAR (glassmorphism + złota paleta) === */
+/**
+ * ============================================================================
+ *  Navbar Stylesheet
+ *  ----------------------------------------------------------------------------
+ *  Defines the visual structure and behavior of the navigation bar.
+ *  Uses a glassmorphism design combined with a golden accent palette
+ *  to create a modern and elegant top navigation element.
+ *
+ *  Sections:
+ *    • Layout: Sticky navbar and container alignment
+ *    • Logo: Brand identity on the left
+ *    • Links: Navigation items with hover and active states
+ *    • Responsive: Adjustments for smaller screens
+ *
+ *  Design Features:
+ *    - Glass effect (blur + transparency)
+ *    - Gold accent color (#ffcc00)
+ *    - Sticky position for persistent visibility
+ * ============================================================================
+ */
+
+/* ===== NAVBAR (glassmorphism + golden palette) ===== */
 .navbar {
     position: sticky;
     top: 0;
     width: 100%;
     z-index: 1000;
 
-    background: rgba(15, 23, 42, 0.7); /* navy z przezroczystością */
+    background: rgba(15, 23, 42, 0.7); /* translucent navy */
     backdrop-filter: blur(10px) saturate(1.2);
     border-bottom: 1px solid rgba(255, 204, 0, 0.25);
 }
 
+/* Container Layout */
 .navbar-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 32px;          /* było 24px → dajmy więcej „oddechu” */
+    padding: 0 32px;
     height: 64px;
 
     display: flex;
     align-items: center;
-    justify-content: space-between; /* logo z lewej, linki z prawej */
+    justify-content: space-between;
 }
 
 /* Logo */
 .navbar-logo a {
-    font-size: 1.5rem;        /* trochę większe logo */
+    font-size: 1.5rem;
     font-weight: 800;
     text-decoration: none;
     color: #ffcc00;
@@ -31,10 +53,10 @@
     text-transform: uppercase;
 }
 
-/* Links */
+/* Navigation Links */
 .navbar-links {
     display: flex;
-    gap: 24px;                /* było 28px → mniejszy odstęp, bliżej siebie */
+    gap: 24px;
 }
 
 .navbar-links a {
@@ -42,28 +64,29 @@
     font-size: 1rem;
     font-weight: 600;
     text-decoration: none;
-    color: #f8fafc; /* jasny tekst */
+    color: #f8fafc; /* light text */
     transition: color 0.25s ease;
     padding: 6px 0;
 }
 
-/* Hover efekt */
+/* Hover Effect */
 .navbar-links a:hover {
     color: #ffcc00;
 }
 
-/* Podkreślenie aktywnego linka */
+/* Active Link Indicator */
 .navbar-links a.active::after {
     content: "";
     position: absolute;
-    left: 0; bottom: -2px;
+    left: 0;
+    bottom: -2px;
     width: 100%;
     height: 2px;
     background: #ffcc00;
     border-radius: 2px;
 }
 
-/* Responsywność */
+/* Responsive Adjustments */
 @media (max-width: 768px) {
     .navbar-container {
         flex-direction: column;

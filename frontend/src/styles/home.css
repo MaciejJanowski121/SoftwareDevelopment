@@ -1,4 +1,30 @@
-/* ========== HOME – SPLIT HERO (ciepła paleta) ========== */
+/**
+ * ============================================================================
+ *  Startseite – Split Hero (warme Farbpalette)
+ *  ----------------------------------------------------------------------------
+ *  Zweck:
+ *    Gestaltet den „Hero“-Bereich der Startseite mit geteiltem Layout.
+ *    Linke Spalte: Überschrift, Untertitel, Highlights (Chips).
+ *    Rechte Spalte: Informationskarte (Öffnungszeiten, Adresse, Kontakt).
+ *
+ *  Hauptmerkmale:
+ *    - Responsives Grid (eine Spalte auf kleineren Bildschirmen)
+ *    - Warmer Glassmorphism-Effekt für die Infokarte
+ *    - Auffälliger Titel mit starkem Kontrast zum Hintergrundbild
+ *    - Minimalistische Highlights ohne Aufzählungszeichen
+ *
+ *  Struktur (Hauptklassen):
+ *    .home.split-hero     → Hauptlayout
+ *    .split-left          → Textinhalt (Titel, Untertitel, Highlights)
+ *    .split-right.card    → Infokarte (z. B. Öffnungszeiten)
+ *    .info-row            → Drei-Spalten-Layout in der Karte (stackt mobil)
+ *
+ *  Hinweise:
+ *    Sollte mit semantischem HTML (main/section/aside) kombiniert werden.
+ * ============================================================================
+ */
+
+
 
 .home.split-hero {
     position: relative;
@@ -8,24 +34,22 @@
     gap: clamp(16px, 4vw, 40px);
     align-items: center;
     padding: clamp(16px, 4vw, 48px);
-    padding-top: calc(84px + 2vw); /* odstęp pod navbar */
-    color: #374151; /* szary bazowy */
+    padding-top: calc(84px + 2vw); /* Abstand unter der Navbar */
+    color: #374151; /* Basisgrau */
     isolation: isolate;
 }
 
-
-
-/* Sekcje kolumn */
+/* Spaltenbereiche */
 .split-left { z-index: 1; }
 .split-right { z-index: 1; }
 
-/* Zamiana: lewa u góry, prawa na dole, wyrównana do prawej */
+/* Alternative Anordnung: linke oben, rechte unten */
 .home.split-hero.swapped {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto 1fr;
     grid-template-areas:
-    "left left"
-    "right right";
+        "left left"
+        "right right";
 }
 
 .split-left {
@@ -43,7 +67,7 @@
     margin-top: 32px;
 }
 
-/* Kicker – złoty badge */
+/* Kicker – goldener Badge */
 .home-kicker {
     display: inline-block;
     margin-bottom: 12px;
@@ -53,30 +77,30 @@
     letter-spacing: 0.02em;
     border-radius: 999px;
     color: #fff8e1;
-    background: #b58500; /* złoty */
+    background: #b58500;
     border: 1px solid rgba(181, 133, 0, 0.4);
     box-shadow: 0 2px 8px rgba(181,133,0,0.25);
 }
 
-/* Tytuł i podtytuł */
+/* Titel und Untertitel */
 .home-title {
     margin: 0 0 10px;
     font-weight: 900;
     letter-spacing: -0.02em;
     font-size: clamp(2.2rem, 2.8vw + 1rem, 3.2rem);
-    color: #f9fafb; /* prawie biały */
-    text-shadow: 0 3px 8px rgba(0,0,0,0.7); /* mocny cień dla kontrastu */
+    color: #f9fafb;
+    text-shadow: 0 3px 8px rgba(0,0,0,0.7);
 }
 
 .home-subtitle {
     margin: 0 0 14px;
-    color: #f3f4f6; /* jasny szary */
+    color: #f3f4f6;
     line-height: 1.6;
     font-size: clamp(1.05rem, 0.9vw + 0.9rem, 1.25rem);
-    text-shadow: 0 2px 6px rgba(0,0,0,0.65); /* ciemny cień */
+    text-shadow: 0 2px 6px rgba(0,0,0,0.65);
 }
 
-/* Highlights – czyste kapsułki, bez bulletów, większe */
+/* Highlights – runde Chips ohne Aufzählungspunkte */
 .home-highlights {
     display: flex;
     flex-wrap: wrap;
@@ -91,12 +115,12 @@
     font-size: 1rem;
     font-weight: 500;
     color: #1e293b;
-    background: rgba(255, 250, 245, 0.9); /* krem */
+    background: rgba(255, 250, 245, 0.9);
     border: 1px solid rgba(181, 133, 0, 0.3);
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
 
-/* Karta informacyjna po prawej (ciepły glass) */
+/* Informationskarte (rechter Bereich) */
 .card {
     background: rgba(255, 250, 245, 0.88);
     border: 1px solid rgba(181, 133, 0, 0.25);
@@ -107,7 +131,7 @@
     padding: clamp(18px, 3vw, 28px);
 }
 
-/* Trzy kolumny wewnątrz karty (stack na mobile) */
+/* Drei-Spalten-Layout in der Karte */
 .info-row {
     display: grid;
     gap: 16px;
@@ -117,7 +141,7 @@
     margin: 0 0 6px;
     font-size: 1.05rem;
     font-weight: 800;
-    color: #b58500; /* złoty akcent */
+    color: #b58500;
 }
 .info-row p {
     margin: 2px 0;
@@ -125,7 +149,7 @@
     font-size: 0.95rem;
 }
 
-/* Responsywność */
+/* Responsivität */
 @media (max-width: 1100px) {
     .split-right { max-width: 720px; }
 }
@@ -133,13 +157,15 @@
     .home.split-hero { grid-template-columns: 1fr; }
     .home.split-hero.swapped {
         grid-template-areas:
-      "left"
-      "right";
+          "left"
+          "right";
     }
     .split-left { max-width: 100%; }
     .split-right { justify-self: stretch; }
     .info-row { grid-template-columns: 1fr; }
 }
+
+/* Reduzierte Bewegung (Barrierefreiheit) */
 @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
 }

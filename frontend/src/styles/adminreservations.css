@@ -1,14 +1,32 @@
-/* ===== Admin Reservations – spójne z NewReservation i AdminPanel ===== */
+/**
+ * ============================================================================
+ *  AdminReservations Stylesheet
+ *  ----------------------------------------------------------------------------
+ *  Dieses Stylesheet definiert das Layout und die visuelle Gestaltung der
+ *  Admin-Übersicht für Reservierungen. Es ist optisch mit NewReservation und
+ *  AdminPanel abgestimmt.
+ *
+ *  Bereiche:
+ *    • Layout: Seiten- und Kartenstruktur
+ *    • Header: Titelzeile mit Zurück-Button
+ *    • Liste: Darstellung einzelner Reservierungszeilen
+ *    • Aktionen: Lösch-Button
+ *    • Zustände: Empty-State, Skeleton-Loader
+ *    • Responsive: Anpassungen für kleinere Viewports
+ * ============================================================================
+ */
 
-/* Layout strony */
+
+
+/* Seitenlayout */
 .admin-resv-page {
-    min-height: 70vh;              /* pełna wysokość okna */
+    min-height: 70vh;
     display: grid;
     place-items: center;
     padding: 24px;
 }
 
-/* Karta kontenera */
+/* Karten-Container */
 .admin-resv-card {
     width: min(900px, 96%);
     background: rgba(255,250,245,0.88);
@@ -20,12 +38,12 @@
     color: #374151;
 }
 
-/* Nagłówek */
+/* Header */
 .admin-resv-header {
     display: flex;
     align-items: center;
-    justify-content: center;  /* tytuł wyśrodkowany */
-    position: relative;       /* żeby back-button mógł być po lewej */
+    justify-content: center;
+    position: relative;
     margin-bottom: 18px;
 }
 
@@ -58,7 +76,7 @@
     color: #1e293b;
 }
 
-/* Lista rezerwacji */
+/* Reservierungsliste */
 .admin-reservation-list {
     list-style: none;
     padding: 0;
@@ -89,7 +107,7 @@
 .reservation-info div { margin: 0; }
 .reservation-info strong { color: #1e293b; }
 
-/* Przycisk usuwania */
+/* Lösch-Button */
 .delete-btn {
     height: 36px;
     padding: 0 14px;
@@ -105,7 +123,7 @@
 .delete-btn:hover { filter: brightness(1.05); }
 .delete-btn:active { transform: translateY(1px); }
 
-/* Pusty stan */
+/* Empty State */
 .empty-state {
     margin: 12px 0 0;
     padding: 12px;
@@ -115,7 +133,7 @@
     color: #374151;
 }
 
-/* Skeleton */
+/* Skeleton Loader */
 .skeleton-list { display: grid; gap: 10px; margin-top: 10px; }
 .skeleton-row {
     height: 56px;
@@ -129,7 +147,7 @@
     100% { background-position: 200px 0; }
 }
 
-/* Responsywność */
+/* Responsive */
 @media (max-width: 900px) {
     .reservation-info { grid-template-columns: 1fr 1fr; }
 }

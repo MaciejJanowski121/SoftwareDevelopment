@@ -1,14 +1,37 @@
-/* ===== Admin Panel – spójny z NewReservation & Auth ===== */
+/**
+ * ============================================================================
+ *  AdminPanel Stylesheet
+ *  ----------------------------------------------------------------------------
+ *  Dieses Stylesheet definiert das Design des Admin-Dashboards der Anwendung.
+ *  Es ist optisch und strukturell an das Layout von "NewReservation" und
+ *  Authentifizierungsseiten (Login, Register) angelehnt.
+ *
+ *  Enthaltene Bereiche:
+ *   • Layout: Grundstruktur & Container
+ *   • Header: Überschriften & Texte
+ *   • Reservation List: Darstellung und Stil der Reservierungen
+ *   • Buttons: Interaktive Elemente (Primary, Danger, Delete)
+ *   • Responsive Design: Optimierung für mobile Geräte
+ *
+ *  Verwendet:
+ *   - Farbpalette: Gold (#b58500), Dunkelrot (#b91c1c), Grau (#374151)
+ *   - Schattierungen und Transparenz für Tiefenwirkung
+ *   - Konsistente Border-Radien und Abstände
+ *
+ *
+ *
+ * ============================================================================
+ */
+
+
 
 /* Layout */
-
 .admin-container {
     min-height: 70vh;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 24px;
-    /* background: #f8f9fa;  USUNIĘTE */
 }
 
 .admin-box {
@@ -24,12 +47,12 @@
     text-align: center;
 }
 
-/* Nagłówki */
+/* Header */
 .admin-container h1 {
     margin: 0 0 16px;
     color: #1e293b;
     font-size: 1.6rem;
-    font-weight: 9000;
+    font-weight: 900;
     letter-spacing: -0.02em;
 }
 .admin-container p {
@@ -37,7 +60,7 @@
     color: #374151;
 }
 
-/* Lista rezerwacji */
+/* Reservation List */
 .reservation-list {
     list-style: none;
     padding: 0;
@@ -52,7 +75,6 @@
     border-radius: 14px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.10);
     padding: 12px 14px;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -63,14 +85,14 @@
     color: #1e293b;
 }
 
-/* Akcje */
+/* Actions */
 .admin-actions {
     display: grid;
     gap: 12px;
     margin: 30px 0;
 }
 
-/* Przyciski */
+/* Buttons */
 .account-btn {
     height: 56px;
     width: 65%;
@@ -83,14 +105,13 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-
     transition: filter .2s, transform .08s, background-color .2s, border-color .2s;
 }
 
 .account-btn:hover { transform: translateY(-1px); }
 .account-btn:active { transform: translateY(0); }
 
-/* Primary (złoty), Danger (czerwony) */
+/* Button Variants */
 .account-btn--primary {
     background: linear-gradient(180deg, #b58500, #8a6500);
     color: #fff;
@@ -104,7 +125,7 @@
 }
 .account-btn--danger:hover { filter: brightness(1.03); }
 
-/* Delete-Button w liście */
+/* Delete Button in List */
 .reservation-list button {
     height: 36px;
     padding: 0 12px;
@@ -119,9 +140,13 @@
 .reservation-list button:hover { filter: brightness(1.05); }
 .reservation-list button:active { transform: translateY(1px); }
 
-/* Mobile */
+/* Responsive Design */
 @media (max-width: 768px) {
     .admin-container { padding: 16px; }
     .admin-container h1 { font-size: 1.4rem; }
-    .reservation-list li { flex-direction: column; gap: 10px; align-items: flex-start; }
+    .reservation-list li {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
 }
