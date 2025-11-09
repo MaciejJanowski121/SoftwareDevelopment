@@ -30,6 +30,21 @@ restaurant-reservierungssystem/
 ├── package.json               # npm-Konfiguration für das Frontend
 └── .gitignore
 
+
+Technologien im Überblick
+
+Ebene / Komponente          # Beschreibung
+───────────────────────────────────────────────────────────────────────────────
+Backend                     # Spring Boot 3.4.3 – REST API, Security, Validation, Data JPA
+Datenbank                   # PostgreSQL – Persistenzschicht
+Authentifizierung            # JWT (jjwt 0.11.5) – Token-basierte Sicherheit
+Frontend                    # React 18.3.1 – Single Page Application
+Styling                      # CSS / Responsive Layouts – Benutzerfreundliches Design
+Tests Backend               # JUnit 5, Mockito – Unit- & Integrationstests
+Tests Frontend              # React Testing Library, Cypress – UI- & End-to-End-Tests
+Build Tools                 # Maven, npm – Projektmanagement & Abhängigkeiten
+
+
 Installation & Start
 
 Backend :
